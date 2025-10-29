@@ -1,232 +1,170 @@
 <?php
 session_start();
 require_once __DIR__ . '/src/Bdd.php';
+
 $bdd = Bdd::connect();
-
 $produits = $bdd->query("SELECT * FROM produits ORDER BY date_ajout DESC LIMIT 5")->fetchAll();
-
-// Données temporaires (plus tard remplacées par ta BDD)
-$totalProduits = 245;
-$produitsEnRupture = 7;
-$livraisonsEnCours = 3;
-$sortiesRecente = 5;
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Paristanbul — Gestionnaire de Stock</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de stock — Paristanbul</title>
 
     <style>
+        /* Style global inspiré du site Paristanbul */
         :root {
-            --rouge: #c62828;
-            --noir: #111;
-            --gris: #f4f4f4;
-            --blanc: #fff;
+            --primary: #c62828;
+            --secondary: #000;
+            --bg: #fff;
+            --gray: #f5f5f5;
+            --radius: 14px;
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-family: "Plus Jakarta Sans", Arial, sans-serif;
         }
 
         body {
             margin: 0;
-            background: var(--gris);
-            color: var(--noir);
+            background: var(--bg);
+            color: var(--secondary);
         }
 
-        /* HEADER */
         header {
-            background: var(--noir);
-            color: var(--blanc);
-            padding: 16px 32px;
+            background: var(--secondary);
+            color: white;
+            padding: 1.2rem 2rem;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
         }
 
         header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            letter-spacing: .05em;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
         }
 
-        nav a {
-            color: var(--blanc);
+        header nav a {
+            color: white;
             text-decoration: none;
-            margin-left: 20px;
+            margin-left: 1.2rem;
             font-weight: 500;
             transition: opacity .2s;
         }
 
-        nav a:hover { opacity: 0.8; }
+        header nav a:hover { opacity: 0.8; }
 
-        /* MAIN */
         main {
-            padding: 40px 5%;
+            padding: 2rem;
+            max-width: 1100px;
+            margin: auto;
         }
 
-        .dashboard {
+        h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .produits {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
         }
 
         .card {
-            background: var(--blanc);
-            border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,.05);
-            padding: 24px;
-            transition: transform .2s;
+            background: var(--gray);
+            border-radius: var(--radius);
+            padding: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease;
         }
 
         .card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
+        }
+
+        .card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: var(--radius);
         }
 
         .card h3 {
-            margin: 0 0 8px;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            color: var(--rouge);
+            font-size: 1.1rem;
+            margin: 0.8rem 0 0.3rem;
         }
 
-        .card .number {
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
-
-        /* TABLEAU */
-        .table-zone {
-            margin-top: 40px;
-            background: var(--blanc);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,.05);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .card p {
+            margin: 0.2rem 0;
             font-size: 0.95rem;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 12px 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            text-transform: uppercase;
-            font-size: .8rem;
-            letter-spacing: .04em;
-            color: #666;
-        }
-
-        tr:hover {
-            background: #fafafa;
         }
 
         .btn {
             display: inline-block;
-            padding: 10px 18px;
-            background: var(--rouge);
-            color: var(--blanc);
+            margin-top: 2rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.6rem;
             border-radius: 8px;
             text-decoration: none;
-            font-size: .9rem;
             font-weight: 600;
             transition: background .2s;
         }
 
         .btn:hover {
-            background: #a11f1f;
+            background: #a91f1f;
         }
 
         footer {
             text-align: center;
-            padding: 24px;
-            font-size: .85rem;
-            color: #777;
-            margin-top: 60px;
+            padding: 1rem;
+            background: var(--secondary);
+            color: #fff;
+            margin-top: 2rem;
         }
     </style>
 </head>
-<body>
 
+<body>
 <header>
-    <h1>Paristanbul — Gestion des Stocks</h1>
+    <h1>Paristanbul — Gestion des stocks</h1>
     <nav>
-        <a href="#">Accueil</a>
-        <a href="#">Produits</a>
-        <a href="#">Entrées</a>
-        <a href="#">Sorties</a>
-        <a href="#">Fournisseurs</a>
+        <a href="index.php">Accueil</a>
+        <a href="produit.php">Produits</a>
+        <a href="ajouter.php">Ajout</a>
+        <a href="#">Statistiques</a>
     </nav>
 </header>
 
 <main>
-    <h2>Tableau de bord</h2>
-    <p>Bienvenue dans le gestionnaire de stock Paristanbul. Voici l’état général du stock :</p>
+    <h2>Derniers produits ajoutés</h2>
 
-    <section class="dashboard">
-        <div class="card">
-            <h3>Total Produits</h3>
-            <div class="number"><?= $totalProduits ?></div>
-        </div>
-
-        <div class="card">
-            <h3>Produits en rupture</h3>
-            <div class="number"><?= $produitsEnRupture ?></div>
-        </div>
-
-        <div class="card">
-            <h3>Livraisons en cours</h3>
-            <div class="number"><?= $livraisonsEnCours ?></div>
-        </div>
-
-        <div class="card">
-            <h3>Sorties récentes</h3>
-            <div class="number"><?= $sortiesRecente ?></div>
-        </div>
-    </section>
-
-    <section class="table-zone">
-        <h3>Derniers mouvements</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Produit</th>
-                <th>Type</th>
-                <th>Quantité</th>
-                <th>Statut</th>
-            </tr>
-            </thead>
-            <tbody>
+    <?php if (empty($produits)): ?>
+        <p>Aucun produit pour le moment.</p>
+    <?php else: ?>
+        <div class="produits">
             <?php foreach ($produits as $p): ?>
-                <tr>
-                    <td><?= date('d/m/Y', strtotime($p['date_ajout'])) ?></td>
-                    <td><?= htmlspecialchars($p['nom']) ?></td>
-                    <td><?= htmlspecialchars($p['categorie']) ?></td>
-                    <td><?= (int)$p['quantite'] ?></td>
-                    <td><?= number_format($p['prix_unitaire'], 2, ',', ' ') ?> €</td>
-                </tr>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?q=80&w=800&auto=format&fit=crop" alt="Produit">
+                    <h3><?= htmlspecialchars($p['nom']) ?></h3>
+                    <p>Catégorie : <?= htmlspecialchars($p['categorie']) ?></p>
+                    <p>Quantité : <?= (int)$p['quantite'] ?></p>
+                    <p>Prix unitaire : <?= number_format((float)$p['prix_unitaire'], 2, ',', ' ') ?> €</p>
+                    <p style="font-size:0.85rem; color:#777;">Ajouté le <?= date('d/m/Y H:i', strtotime($p['date_ajout'])) ?></p>
+                </div>
             <?php endforeach; ?>
-            </tbody>
-        </table>
-        <br>
-        <a href="#" class="btn">Voir tous les mouvements</a>
-    </section>
+        </div>
+    <?php endif; ?>
+
+    <a href="#" class="btn">Voir tout le stock</a>
 </main>
 
 <footer>
-    &copy; <?= date('Y') ?> Paristanbul — Gestionnaire de Stock
+    &copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock
 </footer>
-
 </body>
 </html>
