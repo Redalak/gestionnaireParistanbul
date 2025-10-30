@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Bdd.php';
 
-class ProduitRepository {
+class ProduitRepo {
     private PDO $bdd;
 
     public function __construct() {

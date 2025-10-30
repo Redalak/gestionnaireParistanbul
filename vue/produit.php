@@ -38,7 +38,7 @@ function triLink(string $col, string $label, string $currentSort, string $curren
         $arrow = strtoupper($currentDir) === 'ASC' ? '▲' : '▼';
     }
 
-    return '<a href="produits.php?' . htmlspecialchars($params) . '" style="color:#666;text-decoration:none;">'
+    return '<a href="produit.php?' . htmlspecialchars($params) . '" style="color:#666;text-decoration:none;">'
         . htmlspecialchars($label) . ' ' . $arrow . '</a>';
 }
 
@@ -59,7 +59,7 @@ function stockClass(int $q): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produits — Paristanbul Stock</title>
+    <title>produit — Paristanbul Stock</title>
 
     <style>
         :root {
@@ -300,10 +300,10 @@ function stockClass(int $q): string {
 <body>
 
 <header>
-    <h1>Paristanbul — Produits en stock</h1>
+    <h1>Paristanbul — produit en stock</h1>
     <nav>
         <a href="index.php">Accueil</a>
-        <a href="produits.php">Produits</a>
+        <a href="produit.php">produit</a>
         <a href="ajouter.php">Ajouter</a>
     </nav>
 </header>
@@ -324,7 +324,7 @@ function stockClass(int $q): string {
     <?php endif; ?>
 
     <!-- Filtres -->
-    <form class="filters" method="get" action="produits.php">
+    <form class="filters" method="get" action="produit.php">
         <input
             type="text"
             name="q"

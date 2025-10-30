@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../repository/ProduitRepository.php';
+require_once __DIR__ . '/../repository/ProduitRepo.php';
 
 $id = (int)($_GET['id'] ?? 0);
 
@@ -9,7 +9,7 @@ $id = (int)($_GET['id'] ?? 0);
 $listeUrl = 'http://localhost/produits.php';
 
 if ($id > 0) {
-    $repo = new ProduitRepository();
+    $repo = new ProduitRepo();
     $repo->delete($id);
 
     header('Location: ' . $listeUrl . '?deleted=1');
