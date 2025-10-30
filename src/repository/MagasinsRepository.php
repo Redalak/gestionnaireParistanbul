@@ -8,7 +8,7 @@ require_once __DIR__ . '/../model/Magasin.php';
 use bdd\Bdd;
 use model\Magasins;
 
-class MagasinsRepo
+class MagasinsRepository
 {
     // --- Ajouter un magasin ---
     public function ajoutMagasin(Magasin $magasin) {

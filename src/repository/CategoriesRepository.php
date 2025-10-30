@@ -8,7 +8,7 @@ require_once __DIR__ . '/../model/Categorie.php';
 use bdd\Bdd;
 use model\Categorie;
 
-class CategoriesRepo
+class CategoriesRepository
 {
     // --- Ajouter une catégorie ---
     public function ajoutCategorie(Categorie $categorie) {

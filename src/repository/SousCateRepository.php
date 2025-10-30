@@ -8,7 +8,7 @@ require_once __DIR__ . '/../model/SousCategorie.php';
 use bdd\Bdd;
 use model\SousCategorie;
 
-class SousCateRepo
+class SousCateRepository
 {
     // --- Ajouter une sous-catégorie ---
     public function ajoutSousCategorie(SousCategorie $sousCategorie) {

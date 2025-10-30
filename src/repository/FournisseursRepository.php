@@ -8,7 +8,7 @@ require_once __DIR__ . '/../model/Fournisseur.php';
 use bdd\Bdd;
 use model\Fournisseur;
 
-class FournisseursRepo
+class FournisseursRepository
 {
     // --- Ajouter un fournisseur ---
     public function ajoutFournisseur(Fournisseur $fournisseur) {
