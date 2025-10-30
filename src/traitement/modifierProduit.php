@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../repository/ProduitRepo.php';
+require_once __DIR__ . '/../repository/ProduitRepository.php';
 
 $id        = (int)($_POST['id'] ?? 0);
 $nom       = trim($_POST['nom'] ?? '');
@@ -14,7 +14,7 @@ $modifierBase = 'http://localhost:8888/modifier.php';
 
 if ($id > 0 && $nom && $categorie && $quantite >= 0 && $prix >= 0) {
 
-    $repo = new ProduitRepo();
+    $repo = new ProduitRepository();
     $repo->update($id, $nom, $categorie, $quantite, $prix);
 
     header('Location: ' . $modifierBase . '?id=' . $id . '&success=1');
