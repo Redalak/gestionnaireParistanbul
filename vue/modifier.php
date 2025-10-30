@@ -174,8 +174,7 @@ $error   = isset($_GET['error']);
     </form>
 
     <!-- ⬇⬇⬇ c'est CE lien dont on parle -->
-    <a href="produit.php" class="back">← Retour à la liste</a>
-</main>
+    <a href="produit.php" class="back">← Retour à la liste</a></main>
 
 </body>
 </html>
