@@ -1,7 +1,26 @@
 <?php
+declare(strict_types=1);
 session_start();
-require_once __DIR__ . '/../src/bdd/Bdd.php';
 
+require_once __DIR__ . '/../src/bdd/Bdd.php';
+use bdd\Bdd;
+
+$pdo = (new Bdd())->getBdd();
+
+/* Derniers produits (avec nom de catégorie) */
+$sql = "
+  SELECT
+    p.id_produit,
+    p.libelle            AS nom,
+    c.nom                AS categorie,
+    p.nb_unite_pack      AS quantite,
+    p.prix_unitaire
+  FROM produits p
+  LEFT JOIN categorie c ON c.id_categorie = p.ref_categorie
+  ORDER BY p.id_produit DESC
+  LIMIT 12
+";
+$produits = $pdo->query($sql)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -20,16 +39,8 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
             --radius: 14px;
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: "Plus Jakarta Sans", Arial, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--secondary);
-        }
+        * { box-sizing: border-box; font-family: "Plus Jakarta Sans", Arial, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--secondary); }
 
         header {
             background: var(--secondary);
@@ -39,38 +50,14 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
             justify-content: space-between;
             align-items: center;
         }
-
-        header h1 {
-            font-size: 1.4rem;
-            letter-spacing: 0.5px;
-        }
-
-        header nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 1.2rem;
-            font-weight: 500;
-            transition: opacity .2s;
-        }
-
+        header h1 { font-size: 1.4rem; letter-spacing: 0.5px; }
+        header nav a { color: white; text-decoration: none; margin-left: 1.2rem; font-weight: 500; transition: opacity .2s; }
         header nav a:hover { opacity: 0.8; }
 
-        main {
-            padding: 2rem;
-            max-width: 1100px;
-            margin: auto;
-        }
+        main { padding: 2rem; max-width: 1100px; margin: auto; }
+        h2 { font-size: 1.6rem; margin-bottom: 1rem; }
 
-        h2 {
-            font-size: 1.6rem;
-            margin-bottom: 1rem;
-        }
-
-        .produits {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1.5rem;
-        }
+        .produits { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
 
         .card {
             background: var(--gray);
@@ -79,10 +66,7 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
             box-shadow: 0 4px 10px rgba(0,0,0,0.06);
             transition: transform 0.2s ease;
         }
-
-        .card:hover {
-            transform: translateY(-3px);
-        }
+        .card:hover { transform: translateY(-3px); }
 
         .card img {
             width: 100%;
@@ -90,16 +74,8 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
             object-fit: cover;
             border-radius: var(--radius);
         }
-
-        .card h3 {
-            font-size: 1.1rem;
-            margin: 0.8rem 0 0.3rem;
-        }
-
-        .card p {
-            margin: 0.2rem 0;
-            font-size: 0.95rem;
-        }
+        .card h3 { font-size: 1.1rem; margin: 0.8rem 0 0.3rem; }
+        .card p { margin: 0.2rem 0; font-size: 0.95rem; }
 
         .btn {
             display: inline-block;
@@ -112,18 +88,9 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
             font-weight: 600;
             transition: background .2s;
         }
+        .btn:hover { background: #a91f1f; }
 
-        .btn:hover {
-            background: #a91f1f;
-        }
-
-        footer {
-            text-align: center;
-            padding: 1rem;
-            background: var(--secondary);
-            color: #fff;
-            margin-top: 2rem;
-        }
+        footer { text-align: center; padding: 1rem; background: var(--secondary); color: #fff; margin-top: 2rem; }
     </style>
 </head>
 
@@ -149,16 +116,15 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
                 <div class="card">
                     <img src="https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?q=80&w=800&auto=format&fit=crop" alt="Produit">
                     <h3><?= htmlspecialchars($p['nom']) ?></h3>
-                    <p>Catégorie : <?= htmlspecialchars($p['categorie']) ?></p>
-                    <p>Quantité : <?= (int)$p['quantite'] ?></p>
+                    <p>Catégorie : <?= htmlspecialchars($p['categorie'] ?? '—') ?></p>
+                    <p>Quantité : <?= (int)($p['quantite'] ?? 0) ?></p>
                     <p>Prix unitaire : <?= number_format((float)$p['prix_unitaire'], 2, ',', ' ') ?> €</p>
-                    <p style="font-size:0.85rem; color:#777;">Ajouté le <?= date('d/m/Y H:i', strtotime($p['date_ajout'])) ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 
-    <a href="#" class="btn">Voir tout le stock</a>
+    <a href="produit.php" class="btn">Voir tout le stock</a>
 </main>
 
 <footer>
