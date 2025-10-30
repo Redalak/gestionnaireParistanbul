@@ -10,7 +10,7 @@ use bdd\Bdd;
 use model\Categorie;
 use PDO;
 
-final class CategoriesRepo
+final class CategoriesRepository
 {
     private const TABLE = 'categorie';
 

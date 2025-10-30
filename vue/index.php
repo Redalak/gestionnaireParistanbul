@@ -101,6 +101,8 @@ $produits = $pdo->query($sql)->fetchAll();
         <a href="index.php">Accueil</a>
         <a href="produit.php">Produits</a>
         <a href="ajouter.php">Ajout</a>
+        <a href="mouvement.php">mouvement</a>
+        <a href="categories.php">Catégories</a>
         <a href="#">Statistiques</a>
     </nav>
 </header>

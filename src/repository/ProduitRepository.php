@@ -85,36 +85,66 @@ final class ProduitRepository
     }
 
     /**
-     * Trouver un produit au format tableau pour modifier.php
-     * (clés adaptées à la vue)
+     * Trouver un produit pour modifier.php
+     * Retourne un tableau normalisé: id, nom, categorie, quantite, prix_unitaire
      */
     public function find(int $id): ?array {
         $pdo = $this->db();
         $st = $pdo->prepare("
             SELECT
-                p.id_produit,
-                p.libelle,
-                p.ref_categorie,
-                p.nb_unite_pack,
-                p.prix_unitaire,
-                c.nom AS categorie_nom
+                p.id_produit                 AS id,
+                p.libelle                    AS nom,
+                COALESCE(c.nom, '')          AS categorie,
+                COALESCE(p.nb_unite_pack,0)  AS quantite,
+                p.prix_unitaire              AS prix_unitaire
             FROM ".self::TABLE." p
             LEFT JOIN categorie c ON c.id_categorie = p.ref_categorie
             WHERE p.id_produit = :id
         ");
         $st->execute([':id' => $id]);
         $row = $st->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return null;
+        return $row ?: null;
+    }
 
-        // mapping simple si ta vue attend d’autres noms
-        return [
-            'id_produit'   => (int)$row['id_produit'],
-            'libelle'      => $row['libelle'],
-            'ref_categorie'=> $row['ref_categorie'],
-            'categorie'    => $row['categorie_nom'],
-            'nb_unite_pack'=> (int)($row['nb_unite_pack'] ?? 0),
-            'prix_unitaire'=> (float)$row['prix_unitaire'],
-        ];
+    /** Créer un produit minimal depuis le formulaire d'ajout */
+    public function create(string $nom, int $categorieId, int $quantite, float $prix): int {
+        $pdo = $this->db();
+        $sql = "INSERT INTO ".self::TABLE." (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
+                VALUES (:nom, :cat, :qte, :prix)";
+        $st = $pdo->prepare($sql);
+        $st->execute([
+            ':nom'  => $nom,
+            ':cat'  => $categorieId,
+            ':qte'  => $quantite,
+            ':prix' => $prix,
+        ]);
+        return (int)$pdo->lastInsertId();
+    }
+
+    /** Mettre à jour un produit depuis modifier.php */
+    public function update(int $id, string $nom, int $categorieId, int $quantite, float $prix): bool {
+        $pdo = $this->db();
+        $sql = "UPDATE ".self::TABLE." SET
+                    libelle = :nom,
+                    ref_categorie = :cat,
+                    nb_unite_pack = :qte,
+                    prix_unitaire = :prix
+                WHERE id_produit = :id";
+        $st = $pdo->prepare($sql);
+        return $st->execute([
+            ':id'   => $id,
+            ':nom'  => $nom,
+            ':cat'  => $categorieId,
+            ':qte'  => $quantite,
+            ':prix' => $prix,
+        ]);
+    }
+
+    /** Supprimer un produit par ID (alias pratique) */
+    public function delete(int $id): bool {
+        $pdo = $this->db();
+        $st = $pdo->prepare('DELETE FROM '.self::TABLE.' WHERE id_produit = :id');
+        return $st->execute([':id' => $id]);
     }
 
     /* ===================================

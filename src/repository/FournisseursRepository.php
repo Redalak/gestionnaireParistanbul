@@ -10,7 +10,7 @@ use bdd\Bdd;
 use model\Fournisseur;
 use PDO;
 
-final class FournisseursRepo
+final class FournisseursRepository
 {
     private const TABLE = 'fournisseur';
 

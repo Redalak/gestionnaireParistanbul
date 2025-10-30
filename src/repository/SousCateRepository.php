@@ -10,7 +10,7 @@ use bdd\Bdd;
 use model\SousCategorie;
 use PDO;
 
-final class SousCateRepo
+final class SousCateRepository
 {
     private const TABLE = 'sous_categorie';
 

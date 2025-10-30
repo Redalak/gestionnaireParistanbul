@@ -10,7 +10,7 @@ use bdd\Bdd;
 use model\Magasin;
 use PDO;
 
-final class MagasinsRepo
+final class MagasinsRepository
 {
     private const TABLE = 'magasins'; // ← aligné avec le schéma
 

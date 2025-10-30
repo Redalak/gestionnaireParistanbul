@@ -10,33 +10,45 @@ $bdd = (new Bdd())->getBdd();
 $message = null;
 
 /* Charger les catégories pour le <select> */
-$categories = $bdd->query("SELECT id_categorie, nom FROM categorie ORDER BY nom")->fetchAll();
+$categories = $bdd->query("
+    SELECT id_categorie, nom
+    FROM categorie
+    ORDER BY nom
+")->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom        = trim($_POST['nom'] ?? '');
-    $catId      = (int)($_POST['categorie'] ?? 0);      // ID de categorie
-    $nbUnites   = (int)($_POST['quantite'] ?? 0);       // mappé sur nb_unite_pack
+    $catIdRaw   = $_POST['categorie'] ?? '';
+    $catId      = is_numeric($catIdRaw) ? (int)$catIdRaw : 0;   // ID catégorie
+    $nbUnites   = (int)($_POST['quantite'] ?? 0);               // nb_unite_pack
     $prix       = (float)($_POST['prix_unitaire'] ?? 0);
 
-    if ($nom !== '' && $catId > 0 && $nbUnites >= 0 && $prix >= 0) {
-        $stmt = $bdd->prepare("
-            INSERT INTO produits (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
-            VALUES (:libelle, :ref_categorie, :nb_unite_pack, :prix_unitaire)
-        ");
-        $stmt->execute([
-                ':libelle'        => $nom,
-                ':ref_categorie'  => $catId,
-                ':nb_unite_pack'  => $nbUnites,
-                ':prix_unitaire'  => $prix,
-        ]);
-
-        // Option A: message inline
-        $message = "✅ Produit ajouté avec succès !";
-
-        // Option B (décommenter si tu préfères éviter le repost F5):
-        header('Location: ajouter.php?success=1'); exit;
-    } else {
+    // Catégorie requise et valeurs valides
+    if ($nom === '' || $catId <= 0 || $nbUnites < 0 || $prix < 0) {
         $message = "⚠️ Merci de remplir correctement tous les champs.";
+    } else {
+        // Vérifie que l’ID existe bien
+        $chk = $bdd->prepare('SELECT 1 FROM categorie WHERE id_categorie = :id LIMIT 1');
+        $chk->execute([':id' => $catId]);
+
+        if (!$chk->fetchColumn()) {
+            $message = "⚠️ Catégorie invalide (introuvable).";
+        } else {
+            // Insert propre
+            $stmt = $bdd->prepare("
+                INSERT INTO produits (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
+                VALUES (:libelle, :ref_categorie, :nb_unite_pack, :prix_unitaire)
+            ");
+            $stmt->bindValue(':libelle',        $nom,      \PDO::PARAM_STR);
+            $stmt->bindValue(':ref_categorie',  $catId,    \PDO::PARAM_INT);
+            $stmt->bindValue(':nb_unite_pack',  $nbUnites, \PDO::PARAM_INT);
+            $stmt->bindValue(':prix_unitaire',  $prix); // décimal
+
+            $stmt->execute();
+
+            header('Location: ajouter.php?success=1');
+            exit;
+        }
     }
 }
 ?>
@@ -88,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <?php if ($message): ?>
-        <div class="message <?= str_starts_with($message, '✅') ? 'success' : 'error' ?>">
+        <div class="message <?= str_starts_with($message, '⚠️') ? 'error' : 'success' ?>">
             <?= htmlspecialchars($message) ?>
         </div>
     <?php endif; ?>
