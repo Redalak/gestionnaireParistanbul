@@ -3,22 +3,22 @@
 namespace repository;
 
 use Bdd;
+
 use model\User;
 
 class UserRepository
 {
     private Bdd $db ;
-    public function __construct(?\Bdd $pdo = null)
+    public function __construct(?Bdd $pdo = null)
     {
-
-            $this -> db = (new Bdd())-> connect;
+        $this->db = $pdo ?? new Bdd();
 
     }
 public function getAllUser(){
         $sql = "SELECT * from utilisateur";
-        $stmt = $this -> bdd -> prepare($sql);
+        $stmt = $this -> db -> prepare($sql);
         $stmt->execute();
-        $result = $stmt->fetch(Bdd::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result ?: null;
 
 }
@@ -26,7 +26,7 @@ public function getUserById(User $idUser){
     $sql = "SELECT * FROM utilisateur WHERE id_user = :id_user";
     $stmt = $this->db->prepare($sql);
     $stmt->execute(['id_user' => $idUser]);
-    $result = $stmt->fetch(Bdd::FETCH_ASSOC);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result ?: null;
 }
 public function inscription(User $user){
@@ -49,7 +49,7 @@ public function inscription(User $user){
         $sql = "SELECT * FROM utilisateur WHERE email = :email";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['email' => $email]);
-        $result = $stmt->fetch(Bdd::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
     }
     public function update(int $id_user, array $data): bool
