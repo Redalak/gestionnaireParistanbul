@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/src/Bdd.php';
-require_once __DIR__ . '/src/repository/ProduitRepo.php';
+require_once __DIR__ . '/../src/Bdd.php';
+require_once __DIR__ . '/../src/repository/ProduitRepo.php';
 
 $repo = new ProduitRepo();
 
@@ -391,7 +391,7 @@ function stockClass(int $q): string {
                                 </a>
 
                                 <a class="mini-btn delete"
-                                   href="src/traitement/supprimerProduit.php?id=<?= (int)$p['id'] ?>"
+                                   href="../src/traitement/supprimerProduit.php?id=<?= (int)$p['id'] ?>"
                                    onclick="return confirm('Supprimer ce produit ?');">
                                     Supprimer
                                 </a>

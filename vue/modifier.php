@@ -147,7 +147,7 @@ $error   = isset($_GET['error']);
         <div class="message error">⚠️ Erreur lors de la mise à jour.</div>
     <?php endif; ?>
 
-    <form method="post" action="src/traitement/modifierProduit.php">
+    <form method="post" action="../src/traitement/modifierProduit.php">
         <input type="hidden" name="id" value="<?= (int)$produit['id'] ?>">
 
         <div>

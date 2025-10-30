@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/src/Bdd.php';
+require_once __DIR__ . '/../src/Bdd.php';
 $bdd = Bdd::connect();
 $success = isset($_GET['success']);
 $error   = isset($_GET['error']);
@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($error): ?>
         <div class="message error">⚠️ Merci de remplir correctement tous les champs.</div>
     <?php endif; ?>
-    <form method="post" action="src/traitement/ajouterProduit.php">
+    <form method="post" action="../src/traitement/ajouterProduit.php">
         <div>
             <label for="nom">Nom du produit</label>
             <input type="text" name="nom" id="nom" required>

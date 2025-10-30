@@ -1,9 +1,7 @@
 <?php
 session_start();
-require_once __DIR__ . '/src/Bdd.php';
+require_once __DIR__ . '/../src/bdd/Bdd.php';
 
-$bdd = Bdd::connect();
-$produits = $bdd->query("SELECT * FROM produits ORDER BY date_ajout DESC LIMIT 5")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">

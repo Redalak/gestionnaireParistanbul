@@ -31,7 +31,7 @@ function redirect(string $path, array $params = []): never
     // $path = "/produits.php" ou "/modifier.php"
     // $params = ['deleted' => 1] etc
 
-    $url = rtrim(baseUrl(), '/') . $path;
+    $url = config . phprtrim(baseUrl(), '/') . $path;
 
     if (!empty($params)) {
         $url .= '?' . http_build_query($params);
