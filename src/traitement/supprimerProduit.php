@@ -1,18 +1,21 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../repository/ProduitRepo.php';
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../repository/ProduitRepository.php';
+
+use repository\ProduitRepository;
 
 $id = (int)($_GET['id'] ?? 0);
 
-if ($id > 0) {
-    $repo = new ProduitRepo();
-    $repo->delete($id);
+// retour vers la liste depuis /src/traitement/
+$listeUrl = '../../vue/produit.php';
 
-    // ✅ après suppression -> retour liste avec ?deleted=1
-    redirect('/produit.php', ['deleted' => 1]);
-} else {
-    // ⚠️ id pas valide -> deleted=0
-    redirect('/produit.php', ['deleted' => 0]);
+if ($id > 0) {
+    $repo = new ProduitRepository();
+    $repo->delete($id);
+    header('Location: ' . $listeUrl . '?deleted=1');
+    exit;
 }
+
+header('Location: ' . $listeUrl . '?deleted=0');
+exit;

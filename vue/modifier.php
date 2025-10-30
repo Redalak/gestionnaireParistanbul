@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/src/repository/ProduitRepo.php';
+require_once __DIR__ . '/src/repository/ProduitRepository.php';
 
 $id = (int)($_GET['id'] ?? 0);
-$repo = new ProduitRepo();
+$repo = new ProduitRepository();
 $produit = $repo->find($id);
 
 if (!$produit) {

@@ -2,9 +2,9 @@
 session_start();
 
 require_once __DIR__ . '/../src/Bdd.php';
-require_once __DIR__ . '/../src/repository/ProduitRepo.php';
+require_once __DIR__ . '/../src/repository/ProduitRepository.php';
 
-$repo = new ProduitRepo();
+$repo = new ProduitRepository();
 
 /* Récupération des filtres GET */
 $search     = isset($_GET['q']) ? trim($_GET['q']) : '';

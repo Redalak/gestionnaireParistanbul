@@ -11,7 +11,7 @@ use bdd\Bdd;
 use model\Produit;
 use PDO;
 
-final class ProduitRepo
+final class ProduitRepository
 {
     private const TABLE = 'produits';   // <-- IMPORTANT: au pluriel
 

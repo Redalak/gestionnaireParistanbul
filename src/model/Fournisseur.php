@@ -5,7 +5,7 @@ namespace model;
 class Fournisseur
 {
     private $idFournisseur ;
-   
+
     private $cp ;
     private $adresse ;
     private $email ;

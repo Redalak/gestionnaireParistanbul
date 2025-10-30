@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "✅ Produit ajouté avec succès !";
 
         // Option B (décommenter si tu préfères éviter le repost F5):
-        // header('Location: ajouter.php?success=1'); exit;
+        header('Location: ajouter.php?success=1'); exit;
     } else {
         $message = "⚠️ Merci de remplir correctement tous les champs.";
     }
