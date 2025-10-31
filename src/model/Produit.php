@@ -7,18 +7,12 @@ class Produit
     private $idProduit ;
     private $libelle ;
     private $marque ;
-    private $origine ;
-    private $refSousCategorie ;
+    private $quantiteCentrale ;
+    private $prixUnitaire;
+    private $seuilAlerte ;
+
     private $refCategorie ;
-    private $referenceProduit ;
-    private $codeBarre ;
-    private $uniteMesure ;
-    private $uniteOuPack;
-    private $nbUnitePack ;
-    private $bio ;
-    private $halal ;
-    private $vegan ;
-    private $prixUnitaire ;
+    private $dateAjout ;
 
     public function __construct(array $donnees)
     {
@@ -28,14 +22,15 @@ class Produit
     private function hydrate(array $donnees): void
     {
         foreach ($donnees as $key => $value) {
-
-            $method = 'set'.ucfirst($key);
+            // Transforme id_produit → idProduit
+            $key = str_replace('_', '', ucwords($key, '_'));
+            $method = 'set' . $key;
             if (method_exists($this, $method)) {
-
                 $this->$method($value);
             }
         }
     }
+
 
     /**
      * @return mixed
@@ -101,13 +96,7 @@ class Produit
         $this->origine = $origine;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRefSousCategorie()
-    {
-        return $this->refSousCategorie;
-    }
+
 
     /**
      * @param mixed $refSousCategorie
@@ -149,121 +138,7 @@ class Produit
         $this->referenceProduit = $referenceProduit;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getCodeBarre()
-    {
-        return $this->codeBarre;
-    }
 
-    /**
-     * @param mixed $codeBarre
-     */
-    public function setCodeBarre($codeBarre): void
-    {
-        $this->codeBarre = $codeBarre;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUniteMesure()
-    {
-        return $this->uniteMesure;
-    }
-
-    /**
-     * @param mixed $uniteMesure
-     */
-    public function setUniteMesure($uniteMesure): void
-    {
-        $this->uniteMesure = $uniteMesure;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUniteOuPack()
-    {
-        return $this->uniteOuPack;
-    }
-
-    /**
-     * @param mixed $uniteOuPack
-     */
-    public function setUniteOuPack($uniteOuPack): void
-    {
-        $this->uniteOuPack = $uniteOuPack;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getNbUnitePack()
-    {
-        return $this->nbUnitePack;
-    }
-
-    /**
-     * @param mixed $nbUnitePack
-     */
-    public function setNbUnitePack($nbUnitePack): void
-    {
-        $this->nbUnitePack = $nbUnitePack;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getBio()
-    {
-        return $this->bio;
-    }
-
-    /**
-     * @param mixed $bio
-     */
-    public function setBio($bio): void
-    {
-        $this->bio = $bio;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getHalal()
-    {
-        return $this->halal;
-    }
-
-    /**
-     * @param mixed $halal
-     */
-    public function setHalal($halal): void
-    {
-        $this->halal = $halal;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getVegan()
-    {
-        return $this->vegan;
-    }
-
-    /**
-     * @param mixed $vegan
-     */
-    public function setVegan($vegan): void
-    {
-        $this->vegan = $vegan;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getPrixUnitaire()
     {
         return $this->prixUnitaire;
@@ -275,6 +150,54 @@ class Produit
     public function setPrixUnitaire($prixUnitaire): void
     {
         $this->prixUnitaire = $prixUnitaire;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getQuantiteCentrale()
+    {
+        return $this->quantiteCentrale;
+    }
+
+    /**
+     * @param mixed $quantiteCentrale
+     */
+    public function setQuantiteCentrale($quantiteCentrale): void
+    {
+        $this->quantiteCentrale = $quantiteCentrale;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSeuilAlerte()
+    {
+        return $this->seuilAlerte;
+    }
+
+    /**
+     * @param mixed $seuilAlerte
+     */
+    public function setSeuilAlerte($seuilAlerte): void
+    {
+        $this->seuilAlerte = $seuilAlerte;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDateAjout()
+    {
+        return $this->dateAjout;
+    }
+
+    /**
+     * @param mixed $dateAjout
+     */
+    public function setDateAjout($dateAjout): void
+    {
+        $this->dateAjout = $dateAjout;
     }
 
 }

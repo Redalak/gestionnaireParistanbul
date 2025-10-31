@@ -8,7 +8,7 @@ use repository\ProduitRepository;
 $id = (int)($_GET['id'] ?? 0);
 
 // retour vers la liste depuis /src/traitement/
-$listeUrl = '../../vue/produit.php';
+$listeUrl = '../../vue/listeProduits.php';
 
 if ($id > 0) {
     $repo = new ProduitRepository();

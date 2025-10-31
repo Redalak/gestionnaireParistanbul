@@ -28,7 +28,7 @@ function baseUrl(): string
  */
 function redirect(string $path, array $params = []): never
 {
-    // $path = "/produits.php" ou "/modifier.php"
+    // $path = "/listeProduits.php" ou "/updateProduit.php"
     // $params = ['deleted' => 1] etc
 
     $url = config . phprtrim(baseUrl(), '/') . $path;

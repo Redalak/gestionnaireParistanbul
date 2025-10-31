@@ -25,7 +25,7 @@ class UserRepository
     public function getAllUser(): array
     {
         $sql  = 'SELECT * FROM utilisateur ORDER BY id_user DESC';
-        $rows = $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->db->prepare($sql)->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new User($r), $rows);
     }
 

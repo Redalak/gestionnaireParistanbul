@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../repository/ProduitRepository.php';
 use repository\ProduitRepository;
 
-$redirectBase = '../../vue/modifier.php';
+$redirectBase = '../../vue/updateProduit.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $id = (int)($_GET['id'] ?? 0);

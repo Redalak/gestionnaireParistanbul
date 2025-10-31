@@ -1,5 +1,5 @@
 <?php
-/* index.php — tableau de bord principal */
+/* factures.php */
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paristanbul • Tableau de bord</title>
 
-    <link rel="stylesheet" href="../src/assets/css/index.css" />
+    <link rel="stylesheet" href="../../src/assets/css/index.css" />
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
@@ -23,8 +23,8 @@
 <!-- BARRE LATÉRALE -->
 <aside class="sidebar">
     <header class="sidebar-header">
-        <a href="index.php" class="header-logo">
-            <img src="../src/assets/img/logo.png" style="width:180px;" alt="Paristanbul" />
+        <a href="../index.php" class="header-logo">
+            <img src="../../src/assets/img/logo.png" style="width:180px;" alt="Paristanbul" />
         </a>
         <button class="sidebar-toggler">
             <span class="material-symbols-rounded">chevron_left</span>
@@ -36,7 +36,7 @@
 
             <!-- Tableau de bord -->
             <li class="nav-item">
-                <a href="index.php" class="nav-link">
+                <a href="../index.php" class="nav-link">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="nav-label">Dashboard</span>
                 </a>
@@ -50,9 +50,9 @@
                     <span class="dropdown-icon material-symbols-rounded">keyboard_arrow_down</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="crudProduits/listeProduits.php" class="nav-link dropdown-link">Liste des produits</a></li>
-                    <li><a href="../vue/crudProduits/ajoutProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
-                    <li><a href="../vue/crudProduits/categories.php" class="nav-link dropdown-link">Catégories</a></li>
+                    <li><a href="../crudProduits/listeProduits.php" class="nav-link dropdown-link">Liste des produits</a></li>
+                    <li><a href="../../vue/crudProduits/ajoutProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
+                    <li><a href="../../vue/crudProduits/categories.php" class="nav-link dropdown-link">Catégories</a></li>
                 </ul>
             </li>
 
@@ -64,14 +64,14 @@
                     <span class="dropdown-icon material-symbols-rounded">keyboard_arrow_down</span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="crudCommandes/listeCommandes.php" class="nav-link dropdown-link">Historique</a></li>
-                    <li><a href="../vue/crudCommandes/ajoutCommandes.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
+                    <li><a href="../crudCommandes/listeCommandes.php" class="nav-link dropdown-link">Historique</a></li>
+                    <li><a href="../../vue/crudCommandes/ajoutCommandes.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
                 </ul>
             </li>
 
             <!-- Mouvements -->
             <li class="nav-item">
-                <a href="../vue/mouvements.php" class="nav-link">
+                <a href="../../vue/mouvements.php" class="nav-link">
                     <span class="material-symbols-rounded">compare_arrows</span>
                     <span class="nav-label">Mouvements</span>
                 </a>
@@ -79,7 +79,7 @@
 
             <!-- Statistiques -->
             <li class="nav-item">
-                <a href="../vue/statistiques.php" class="nav-link">
+                <a href="../../vue/statistiques.php" class="nav-link">
                     <span class="material-symbols-rounded">query_stats</span>
                     <span class="nav-label">Statistiques</span>
                 </a>
@@ -87,7 +87,7 @@
 
             <!-- Factures -->
             <li class="nav-item">
-                <a href="../vue/crudFactures/factures.php" class="nav-link">
+                <a href="../../vue/crudFactures/factures.php" class="nav-link">
                     <span class="material-symbols-rounded">receipt_long</span>
                     <span class="nav-label">Factures</span>
                 </a>
@@ -95,7 +95,7 @@
 
             <!-- Utilisateurs -->
             <li class="nav-item">
-                <a href="../vue/crudProfils/profil.php" class="nav-link">
+                <a href="../../vue/crudProfils/profil.php" class="nav-link">
                     <span class="material-symbols-rounded">group</span>
                     <span class="nav-label">Utilisateurs</span>
                 </a>
@@ -121,48 +121,24 @@
 
 <!-- CONTENU PRINCIPAL -->
 <main class="main-content">
-    <section class="dashboard">
-        <h1>Tableau de bord</h1>
-        <hr>
-        <div style="padding:40px">
-            <h2>Résumé du stock</h2>
-            <ul>
-                <li>Total produits en stock</li>
-                <li>Commandes en cours</li>
-                <li>Factures impayées</li>
-                <li>Produits presque en rupture</li>
-            </ul>
-        </div>
 
-        <div style="padding:40px">
-            <h2>Derniers produits ajoutés</h2>
-            <p>Liste des 10 à 12 derniers produits + bouton “Voir tout le stock”.</p>
-        </div>
+<hr>
+    <div style="padding: 60px">
+        <h1>gestion des factures clients/fournisseurs, lien avec les commandes.</h1>
+    </div>
+    <hr
+    <div style="padding: 60px">
+        <h1>Les listes factures Marquer comme payée - Modifier - Supprimer - Exporter DATATABLE</h1>
+    </div>
+    <hr>
+    <div style="padding: 60px">
+        <h1>DETAIL FACTURE REDIRECTION (detail_facture.php) </h1>
+    </div>
+    <hr>
 
-        <div style="padding:40px">
-            <h2>Statistiques simples</h2>
-            <ul>
-                <li>Graphique “Stock par catégorie”</li>
-                <li>Graphique “Produits les plus vendus”</li>
-                <li>Chiffre d’affaires mensuel / par magasin</li>
-            </ul>
-        </div>
 
-        <div style="padding:40px">
-            <h2>Alertes</h2>
-            <ul>
-                <li>Produits sous le seuil</li>
-                <li>Commandes non livrées depuis longtemps</li>
-            </ul>
-        </div>
-    </section>
+    <footer>&copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock</footer>
 </main>
-
-<footer>
-    &copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock
-</footer>
-
-
 </body>
 </html>
-<script type="text/javascript" src="../src/assets/js/index.js"> </script>
+<script type="text/javascript" src="../../src/assets/js/index.js"> </script>

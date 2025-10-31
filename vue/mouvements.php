@@ -1,6 +1,4 @@
-<?php
-/* index.php — tableau de bord principal */
-?>
+<?php  /*mouvements.php */?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paristanbul • Tableau de bord</title>
 
-    <link rel="stylesheet" href="../src/assets/css/index.css" />
+    <link rel="stylesheet" href="../../src/assets/css/index.css" />
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
@@ -24,7 +22,7 @@
 <aside class="sidebar">
     <header class="sidebar-header">
         <a href="index.php" class="header-logo">
-            <img src="../src/assets/img/logo.png" style="width:180px;" alt="Paristanbul" />
+            <img src="../../src/assets/img/logo.png" style="width:180px;" alt="Paristanbul" />
         </a>
         <button class="sidebar-toggler">
             <span class="material-symbols-rounded">chevron_left</span>
@@ -71,7 +69,7 @@
 
             <!-- Mouvements -->
             <li class="nav-item">
-                <a href="../vue/mouvements.php" class="nav-link">
+                <a href="mouvements.php" class="nav-link">
                     <span class="material-symbols-rounded">compare_arrows</span>
                     <span class="nav-label">Mouvements</span>
                 </a>
@@ -121,48 +119,14 @@
 
 <!-- CONTENU PRINCIPAL -->
 <main class="main-content">
-    <section class="dashboard">
-        <h1>Tableau de bord</h1>
-        <hr>
-        <div style="padding:40px">
-            <h2>Résumé du stock</h2>
-            <ul>
-                <li>Total produits en stock</li>
-                <li>Commandes en cours</li>
-                <li>Factures impayées</li>
-                <li>Produits presque en rupture</li>
-            </ul>
-        </div>
+    <hr>
+    <div style="padding:50px">
+        <h1> Entrées/Sorties (Date , produits) DATATABLE </h1>
+    </div>
+<hr>
 
-        <div style="padding:40px">
-            <h2>Derniers produits ajoutés</h2>
-            <p>Liste des 10 à 12 derniers produits + bouton “Voir tout le stock”.</p>
-        </div>
-
-        <div style="padding:40px">
-            <h2>Statistiques simples</h2>
-            <ul>
-                <li>Graphique “Stock par catégorie”</li>
-                <li>Graphique “Produits les plus vendus”</li>
-                <li>Chiffre d’affaires mensuel / par magasin</li>
-            </ul>
-        </div>
-
-        <div style="padding:40px">
-            <h2>Alertes</h2>
-            <ul>
-                <li>Produits sous le seuil</li>
-                <li>Commandes non livrées depuis longtemps</li>
-            </ul>
-        </div>
-    </section>
+    <footer>&copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock</footer>
 </main>
-
-<footer>
-    &copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock
-</footer>
-
-
 </body>
 </html>
-<script type="text/javascript" src="../src/assets/js/index.js"> </script>
+<script type="text/javascript" src="../../src/assets/js/index.js"> </script>

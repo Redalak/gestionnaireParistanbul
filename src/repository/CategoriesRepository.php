@@ -37,19 +37,19 @@ final class CategoriesRepository
 
     // --- Supprimer une catégorie ---
     public function suppCategorie(int $idCategorie): void {
-        $req = $this->db()->prepare('DELETE FROM '.self::TABLE.' WHERE id_categorie = :id_categorie');
+        $req = $this->db()->prepare('DELETE FROM categorie WHERE id_categorie = :id_categorie');
         $req->execute(['id_categorie' => $idCategorie]);
     }
 
     // --- Liste complète des catégories (objets) ---
     public function listeCategories(): array {
-        $rows = $this->db()->query('SELECT * FROM '.self::TABLE.' ORDER BY nom ASC')->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->db()->query('SELECT * FROM categorie ORDER BY nom ASC')->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Categorie($r), $rows);
     }
 
     // --- Dernières catégories ajoutées ---
     public function getDernieresCategories(int $limit = 5): array {
-        $stmt = $this->db()->prepare('SELECT * FROM '.self::TABLE.' ORDER BY id_categorie DESC LIMIT :limit');
+        $stmt = $this->db()->prepare('SELECT * FROM  ORDER BY id_categorie DESC LIMIT :limit');
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

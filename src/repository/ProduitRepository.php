@@ -24,7 +24,7 @@ final class ProduitRepository
        ========================= */
 
     /**
-     * Liste paginable/triable/filtrable pour produit.php
+     * Liste paginable/triable/filtrable pour listeProduits.php
      * Retourne des tableaux associatifs avec clés attendues par la vue:
      *  id, nom, categorie, quantite, prix_unitaire
      */
@@ -85,7 +85,7 @@ final class ProduitRepository
     }
 
     /**
-     * Trouver un produit pour modifier.php
+     * Trouver un produit pour updateProduit.php
      * Retourne un tableau normalisé: id, nom, categorie, quantite, prix_unitaire
      */
     public function find(int $id): ?array {
@@ -121,7 +121,7 @@ final class ProduitRepository
         return (int)$pdo->lastInsertId();
     }
 
-    /** Mettre à jour un produit depuis modifier.php */
+    /** Mettre à jour un produit depuis updateProduit.php */
     public function update(int $id, string $nom, int $categorieId, int $quantite, float $prix): bool {
         $pdo = $this->db();
         $sql = "UPDATE ".self::TABLE." SET
@@ -187,43 +187,33 @@ final class ProduitRepository
     // Modifier
     public function modifProduit(Produit $produit): Produit {
         $db = $this->db();
-        $req = $db->prepare('
-            UPDATE '.self::TABLE.' SET
+
+        $sql = "UPDATE produit SET
                 libelle = :libelle,
                 marque = :marque,
-                origine = :origine,
-                ref_sous_categorie = :ref_sous_categorie,
+                quantite_centrale = :quantite_centrale,
+                prix_unitaire = :prix_unitaire,
+                seuil_alerte = :seuil_alerte,
                 ref_categorie = :ref_categorie,
-                reference_produit = :reference_produit,
-                code_barre = :code_barre,
-                unite_mesure = :unite_mesure,
-                unite_ou_pack = :unite_ou_pack,
-                nb_unite_pack = :nb_unite_pack,
-                bio = :bio,
-                halal = :halal,
-                vegan = :vegan,
-                prix_unitaire = :prix_unitaire
-            WHERE id_produit = :id_produit
-        ');
-        $req->execute([
-            'id_produit'         => $produit->getIdProduit(),
-            'libelle'            => $produit->getLibelle(),
-            'marque'             => $produit->getMarque(),
-            'origine'            => $produit->getOrigine(),
-            'ref_sous_categorie' => $produit->getRefSousCategorie(),
-            'ref_categorie'      => $produit->getRefCategorie(),
-            'reference_produit'  => $produit->getReferenceProduit(),
-            'code_barre'         => $produit->getCodeBarre(),
-            'unite_mesure'       => $produit->getUniteMesure(),
-            'unite_ou_pack'      => $produit->getUniteOuPack(),
-            'nb_unite_pack'      => $produit->getNbUnitePack(),
-            'bio'                => $produit->getBio(),
-            'halal'              => $produit->getHalal(),
-            'vegan'              => $produit->getVegan(),
-            'prix_unitaire'      => $produit->getPrixUnitaire(),
+                date_ajout = :date_ajout
+            WHERE id_produit = :id_produit";
+
+        $stmt = $db->prepare($sql);
+
+        $stmt->execute([
+            ':libelle' => $produit->getLibelle(),
+            ':marque' => $produit->getMarque(),
+            ':quantite_centrale' => $produit->getQuantiteCentrale(),
+            ':prix_unitaire' => $produit->getPrixUnitaire(),
+            ':seuil_alerte' => $produit->getSeuilAlerte(),
+            ':ref_categorie' => $produit->getRefCategorie(),
+            ':date_ajout' => $produit->getDateAjout(),
+            ':id_produit' => $produit->getIdProduit()
         ]);
+
         return $produit;
     }
+
 
     // Supprimer
     public function suppProduit(int $idProduit): void {
@@ -235,10 +225,11 @@ final class ProduitRepository
     // Lister tous (retourne des objets Produit comme avant)
     public function listeProduits(): array {
         $db = $this->db();
-        $req = $db->query('SELECT * FROM '.self::TABLE.' ORDER BY id_produit DESC');
-        $rows = $req->fetchAll(PDO::FETCH_ASSOC);
-        return array_map(fn($r) => new Produit($r), $rows);
+        $stmt = $db->prepare('SELECT * FROM produit ORDER BY id_produit DESC');
+        $stmt->execute();
+        return array_map(fn($row) => new Produit($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
+
 
     // Derniers produits
     public function getDerniersProduits(int $limit = 5): array {
@@ -260,7 +251,7 @@ final class ProduitRepository
     // Récup produit par ID (objet)
     public function getProduitParId(int $idProduit): ?Produit {
         $db = $this->db();
-        $st = $db->prepare('SELECT * FROM '.self::TABLE.' WHERE id_produit = :id');
+        $st = $db->prepare('SELECT * FROM produit WHERE id_produit = :id');
         $st->execute([':id' => $idProduit]);
         $row = $st->fetch(PDO::FETCH_ASSOC);
         return $row ? new Produit($row) : null;
@@ -269,7 +260,7 @@ final class ProduitRepository
     // Recherche par libellé (objets)
     public function getProduitsParLibelle(string $libelle): array {
         $db = $this->db();
-        $st = $db->prepare('SELECT * FROM '.self::TABLE.' WHERE libelle LIKE :q');
+        $st = $db->prepare('SELECT * FROM  WHERE libelle LIKE :q');
         $st->execute([':q' => '%'.$libelle.'%']);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Produit($r), $rows);
@@ -278,7 +269,7 @@ final class ProduitRepository
     // Filtre par catégorie (objets)
     public function getProduitsParCategorie(int $refCategorie): array {
         $db = $this->db();
-        $st = $db->prepare('SELECT * FROM '.self::TABLE.' WHERE ref_categorie = :c');
+        $st = $db->prepare('SELECT * FROM  WHERE ref_categorie = :c');
         $st->execute([':c' => $refCategorie]);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Produit($r), $rows);
