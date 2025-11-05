@@ -12,6 +12,7 @@ use PDO;
 
 final class MagasinsRepository
 {
+    private PDO $db;
     private const TABLE = 'magasins'; // ← aligné avec le schéma
 
     private function db(): PDO {
@@ -66,11 +67,13 @@ final class MagasinsRepository
     }
 
     // --- Liste complète des magasins (objets) ---
-    public function listeMagasins(): array {
-        $rows = $this->db()->query('SELECT * FROM '.self::TABLE.' ORDER BY id_magasin DESC')
-                           ->fetchAll(PDO::FETCH_ASSOC);
+    public function getAllMagasins(): array {
+        $st = $this->db()->prepare('SELECT * FROM magasin  ORDER BY id_magasin');
+        $st->execute();
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Magasin($r), $rows);
-    }
+        }
+
 
     // --- Derniers magasins ajoutés ---
     public function getDerniersMagasins(int $limit = 5): array {

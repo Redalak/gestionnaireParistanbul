@@ -64,7 +64,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="crudCommandes/listeCommandes.php" class="nav-link dropdown-link">Historique</a></li>
-                    <li><a href="../vue/crudCommandes/ajoutCommandes.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
+                    <li><a href="crudCommandes/createCommande.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
                 </ul>
             </li>
 

@@ -1,11 +1,30 @@
 <?php
 /* listeCommandes.php */
+require_once __DIR__ . '/../../src/repository/CommandeRepository.php';
+require_once __DIR__ . '/../../src/model/Commande.php';
+require_once __DIR__ . '/../../src/repository/MagasinsRepository.php';
+require_once __DIR__ . '/../../src/model/Magasin.php';
+
+use repository\CommandeRepository;
+use model\Produit;
+
+$repoCommandes = new \repository\CommandeRepository();
+$commandes = $repoCommandes ->getAllCommandes() ;
 
 
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables CSS + JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paristanbul • Tableau de bord</title>
@@ -53,7 +72,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="../crudProduits/listeProduits.php" class="nav-link dropdown-link">Liste des produits</a></li>
-                    <li><a href="../../vue/crudProduits/ajoutProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
+                    <li><a href="../crudProduits/createProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
                     <li><a href="../../vue/crudProduits/categories.php" class="nav-link dropdown-link">Catégories</a></li>
                 </ul>
             </li>
@@ -67,7 +86,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="listeCommandes.php" class="nav-link dropdown-link">Historique</a></li>
-                    <li><a href="../../vue/crudCommandes/ajoutCommandes.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
+                    <li><a href="createCommande.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
                 </ul>
             </li>
 
@@ -124,18 +143,63 @@
 
 <!-- CONTENU PRINCIPAL -->
 <main class="main-content">
+    <div class="table-responsive">
+        <table id="liste-commandes">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Magasin</th>
+                <th>Utilisateur</th>
+                <th>Date_commande</th>
+                <th>Etat</th>
+                <th>Commentaire</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach($commandes as $commande): ?>
+                <tr>
+                    <td><?= $commande['id_commande']?></td>
+                    <td><?= $commande['nom_magasin']?></td>
+                    <td><?= $commande['nom_utilisateur']?></td>
+                    <td><?= $commande['date_commande']?></td>
+                    <td><?= $commande['etat'] ?></td>
+                    <td><?= $commande['commentaire'] ?></td>
 
-    <hr>
-    <div style="padding:50px">
-        <h1> Historique des commandes (Datatable)</h1>
+                    <td class="actions">
+                        <a href="updateCommande.php?id=<?= $commande['id_commande']?>" class="btn btn-sm btn-primary" title="Modifier">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="deleteCommande.php?id=<?= $commande['id_commande'] ?>"
+                           class="btn btn-sm btn-danger"
+                           title="Supprimer"
+                           onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
-    <hr>
-    <div style="padding:50px">
-        <h1> Bouton ajouter -modifier - supprimer commande </h1>
-    </div>
+
 
     <footer>&copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock</footer>
 </main>
 </body>
 </html>
 <script type="text/javascript" src="../../src/assets/js/index.js"> </script>
+<!-- Datatable JS id="offre-table" -->
+<script>
+    $(document).ready(function () {
+        $('#liste-commandes').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+            },
+            "pageLength": 10,  // nombre de lignes par page
+            "ordering": true,  // tri des colonnes activé
+            "searching": true, // barre de recherche activée
+            "responsive": true // design responsive
+        });
+    });
+</script>

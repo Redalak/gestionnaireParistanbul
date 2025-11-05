@@ -1,0 +1,103 @@
+/* === PAGE NOUVELLE COMMANDE === */
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 20px;
+    background-color: #f8f9fc;
+    min-height: 100vh;
+}
+
+/* Conteneur principal */
+.container {
+    max-width: 1100px !important;
+    width: 100%;
+}
+
+/* Formulaire */
+.container form {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    padding: 60px 70px !important;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Espaces entre les divs */
+.container form .mb-4 {
+    margin-bottom: 2.5rem !important;
+}
+
+/* Labels */
+.container label {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+/* Inputs et selects */
+.form-select,
+.form-control {
+    font-size: 1.15rem;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid #dcdfe3;
+    width: 100%; /* ✅ garantit que tous les champs prennent toute la largeur */
+    transition: border-color 0.2s ease;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #004085;
+    box-shadow: 0 0 0 3px rgba(0, 64, 133, 0.15);
+    outline: none;
+}
+
+/* Textarea (commentaire) */
+textarea.form-control {
+    resize: vertical;
+    min-height: 180px; /* ✅ plus grand en hauteur */
+    width: 100%;        /* ✅ prend toute la largeur du formulaire */
+    max-width: 100%;    /* empêche toute réduction */
+    font-size: 1.15rem;
+    padding: 14px 18px;
+}
+
+/* Titre */
+.container h2 {
+    font-size: 2.3rem;
+    font-weight: 700;
+    color: #004085;
+    margin-bottom: 40px;
+}
+
+/* Boutons */
+.btn {
+    font-size: 1.15rem;
+    padding: 14px 30px;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: #004085;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+/* Espacement du bas */
+.container form .d-flex {
+    margin-top: 3rem !important;
+}

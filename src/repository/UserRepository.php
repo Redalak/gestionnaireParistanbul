@@ -22,11 +22,15 @@ class UserRepository
     /**
      * Retourne la liste des utilisateurs (objets User)
      */
-    public function getAllUser(): array
+    public function getAllUsers(): array
     {
-        $sql  = 'SELECT * FROM utilisateur ORDER BY id_user DESC';
-        $rows = $this->db->prepare($sql)->fetchAll(PDO::FETCH_ASSOC);
-        return array_map(fn($r) => new User($r), $rows);
+        $sql = 'SELECT * FROM utilisateur ORDER BY id_user DESC';
+        $stmt = $this->db->query($sql);
+        $results = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $results[] = $row;
+        }
+    return $results ;
     }
 
     /**

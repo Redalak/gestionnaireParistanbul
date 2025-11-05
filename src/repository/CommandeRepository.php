@@ -1,12 +1,10 @@
 <?php
 
 namespace repository;
+require_once __DIR__ . '/../../src/bdd/Bdd.php';
 use model\Commande;
-use model\Facture;
-use model\Magasin;
-use PDO ;
+use PDO;
 use bdd\Bdd;
-
 class CommandeRepository
 {
     private PDO $db;
@@ -15,102 +13,139 @@ class CommandeRepository
     {
         $this->db = $pdo ?? (new Bdd())->getBdd();
     }
+
+    // Ajouter une commande
     public function ajoutCommande(Commande $commande): bool
     {
-        $sql = 'INSERT INTO commande (adresse_facturation,ref_fournisseur,ref_produit,ref_magasin,
-                 ref_utilisateur , date_commande , date_arrivee ,quantite , total_ht , tva , total_ttc ,
-                      remise , date_reglement , quantite_totale , mode_reglement)
-                VALUES (:adresse_facturation, :ref_fournisseur, :ref_produit, :ref_magasin,:ref_utilisateur,
-                        :date_commande ,:date_arrivee ,:quantite,:total_ht ,:tva ,:total_ttc , :remise,
-                        :date_reglement , :quantite_totale , :mode_reglement )';
-        $stmt  = $this->db->prepare($sql);
+        // Vérifier que le magasin existe
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM magasin WHERE id_magasin = ?");
+        $stmt->execute([(int) $commande->getRefMagasin()]);
+        if ($stmt->fetchColumn() == 0) {
+            die("Le magasin sélectionné n'existe pas.");
+        }
+
+        // Vérifier que l'utilisateur existe
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM utilisateur WHERE id_user = ?");
+        $stmt->execute([(int) $commande->getRefUtilisateur()]);
+        if ($stmt->fetchColumn() == 0) {
+            die("L'utilisateur sélectionné n'existe pas.");
+        }
+
+        // Insertion
+        $sql = "INSERT INTO commande (ref_magasin, ref_utilisateur, date_commande, etat, commentaire)
+            VALUES (:ref_magasin, :ref_utilisateur, :date_commande, :etat, :commentaire)";
+        $stmt = $this->db->prepare($sql);
+
         return $stmt->execute([
-            'adresse_facturation'    => $commande->getAdresseFacturation(),
-            'ref_fournisseur' => $commande->getRefFournisseur(),
-            'ref_produit'    => $commande->getRefProduit(),
-            'ref_magasin'   => $commande->getRefMagasin(),
-            'ref_utilisateur' => $commande->getRefUtilisateur(),
+            'ref_magasin' => (int) $commande->getRefMagasin(),
+            'ref_utilisateur' => (int) $commande->getRefUtilisateur(),
             'date_commande' => $commande->getDateCommande(),
-            'date_arrivee' => $commande->getDateArrivee(),
-            'quantite'     =>$commande->getQuantite(),
-            'total_ht' => $commande->getTotalHT(),
-            'tva'     => $commande->getTva(),
-            'total_ttc' =>$commande->getTotalTTC(),
-            'remise' => $commande->getRemise(),
-            'date_reglement' => $commande->getDateReglement(),
-            'quantite_totale' => $commande->getQuantiteTotale(),
-            'mode_reglement' => $commande->getModeReglement() ,
+            'etat' => $commande->getEtat(),
+            'commentaire' => $commande->getCommentaire()
         ]);
     }
-    public function updateCommande(int $id_commande, array $data): bool {
-        $allowed = ['adresse_facturation','ref_fournisseur','ref_produit','ref_magasin',
-                 'ref_utilisateur' ,'date_commande' , 'date_arrivee' ,'quantite' , 'total_ht' , 'tva' , 'total_ttc' ,
-                      'remise' , 'date_reglement' , 'quantite_totale' , 'mode_reglement'];
-        $set = [];
-        $params = ['id_commande' => $id_commande];
 
-        foreach ($allowed as $k) {
-            if (array_key_exists($k, $data)) {
-                $set[] = "$k = :$k";
-                $params[$k] = $data[$k];
+
+    // Modifier une commande
+    public function updateCommande(Commande $commande): bool
+    {
+        // Liste des champs autorisés à être mis à jour
+        $allowed = ['ref_magasin', 'ref_utilisateur', 'date_commande', 'etat', 'commentaire'];
+
+        $set = [];
+        $params = ['id_commande' => $commande->getIdCommande()];
+
+        foreach ($allowed as $field) {
+            $getter = 'get' . str_replace('_', '', ucwords($field, '_'));
+            if (method_exists($commande, $getter)) {
+                $value = $commande->$getter();
+                if ($value !== null) {
+                    $set[] = "$field = :$field";
+                    $params[$field] = $value;
+                }
             }
         }
 
-        if (!$set) return false;
+        // Si aucun champ à mettre à jour, on retourne false
+        if (empty($set)) {
+            return false;
+        }
 
-        $sql = 'UPDATE commandes SET ' . implode(', ', $set) . ' WHERE id_commande = :id_commande';
-        $st  = $this->db->prepare($sql);
-        return $st->execute($params);
+        $sql = 'UPDATE commande SET ' . implode(', ', $set) . ' WHERE id_commande = :id_commande';
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
+
+    // Supprimer une commande
     public function deleteCommande(int $id_commande): bool
     {
-        $sql = 'DELETE FROM commandes WHERE id_commande = :id_commande';
-        $st  = $this->db->prepare($sql);
-        return $st->execute(['id_commande' => $id_commande]);
+        $sql = 'DELETE FROM commande WHERE id_commande = :id_commande';
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['id_commande' => $id_commande]);
     }
-    public function getCommandeById(int $idCommande): ?Commande
+
+    // Récupérer une commande par ID
+    public function getCommandeById(int $id_commande): ?Commande
     {
         $sql = 'SELECT * FROM commande WHERE id_commande = :id_commande';
-        $stmt  = $this->db->prepare($sql);
-        $stmt ->execute(['id_commande' => $idCommande]);
-        $row = $stmt ->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id_commande' => $id_commande]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ? new Commande($row) : null;
     }
+
+    // Récupérer toutes les commandes
     public function getAllCommandes(): array {
-        $sql = 'SELECT * FROM commandes';
+        $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
+            FROM commande c
+            LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
+            LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
+            ORDER BY c.date_commande DESC';
         $stmt = $this->db->query($sql);
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $results[] = new Commande($row);
+            $results[] = $row;
         }
         return $results;
     }
-    public function getCommandesByUser(int $idUser): array {
-        $sql = 'SELECT * FROM commandes WHERE ref_utilisateur = :idUser';
+
+    // Récupérer commandes par utilisateur
+    public function getCommandesByUser(int $idUser): array
+    {
+        $sql = 'SELECT * FROM commande WHERE ref_utilisateur = :idUser';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['user_id' => $idUser]);
+        $stmt->execute(['idUser' => $idUser]);
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $results[] = new Commande($row);
         }
         return $results;
     }
-    public function getCommandesByMagasin(int $idMagasin): array {
-        $sql = 'SELECT * FROM commandes WHERE ref_magasin = :id_magasin';
+
+    // Récupérer commandes par magasin
+    public function getCommandesByMagasin(int $idMagasin): array
+    {
+        $sql = 'SELECT * FROM commande WHERE ref_magasin = :idMagasin';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id_magasin' => $idMagasin]);
+        $stmt->execute(['idMagasin' => $idMagasin]);
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $results[] = new Commande($row);
         }
         return $results;
     }
-    public function countCommandes(): int {
-        $sql = 'SELECT COUNT(*) FROM commandes';
+
+    // Compter toutes les commandes
+    public function countCommandes(): int
+    {
+        $sql = 'SELECT COUNT(*) FROM commande';
         return (int) $this->db->query($sql)->fetchColumn();
     }
-    public function findCommandesByDate(string $startDate, string $endDate): array {
-        $sql = 'SELECT * FROM commandes WHERE date_commande BETWEEN :start AND :end';
+
+    // Rechercher commandes par intervalle de dates
+    public function findCommandesByDate(string $startDate, string $endDate): array
+    {
+        $sql = 'SELECT * FROM commande WHERE date_commande BETWEEN :start AND :end';
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['start' => $startDate, 'end' => $endDate]);
         $results = [];
@@ -119,11 +154,4 @@ class CommandeRepository
         }
         return $results;
     }
-
-
-
-
-
-
-
 }

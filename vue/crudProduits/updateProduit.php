@@ -82,7 +82,7 @@ $valueDate = ($produit && $produit->getDateAjout())
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="listeProduits.php" class="nav-link dropdown-link">Liste des produits</a></li>
-                    <li><a href="../../vue/crudProduits/ajoutProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
+                    <li><a href="createProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
                     <li><a href="../../vue/crudProduits/categories.php" class="nav-link dropdown-link">Catégories</a></li>
                 </ul>
             </li>
@@ -96,7 +96,7 @@ $valueDate = ($produit && $produit->getDateAjout())
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="../crudCommandes/listeCommandes.php" class="nav-link dropdown-link">Historique</a></li>
-                    <li><a href="../../vue/crudCommandes/ajoutCommandes.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
+                    <li><a href="../crudCommandes/createCommande.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
                 </ul>
             </li>
 
@@ -151,10 +151,18 @@ $valueDate = ($produit && $produit->getDateAjout())
 </aside>
 <!-- CONTENU PRINCIPAL -->
 <main class="main-content">
-    <section class="mt-5">
-        <h2>Modifier un produit</h2>
+    <div>
+        <!-- Bandeau titre -->
+        <div class="offre-header d-flex justify-content-between align-items-center p-3 mb-4"
+              >
+            <h2 class="fw-bold mb-0">Modifier un produit</h2>
+            <button type="button" class="btn"
+                    onclick="window.location.href='../index.php'">
+                <i class="bi bi-arrow-left-circle"></i> Retour
+            </button>
+        </div>
 
-        <form method="post" class="form-container">
+        <form method="post" class="form-container" style="background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);>
             <input type="hidden" name="update_produit" value="1">
 
             <div class="row">
@@ -216,7 +224,7 @@ $valueDate = ($produit && $produit->getDateAjout())
 
         </form>
 
-    </section>
+    </div>
 </main>
 </body>
 </html>

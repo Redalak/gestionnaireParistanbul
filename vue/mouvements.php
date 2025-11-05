@@ -49,7 +49,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="crudProduits/listeProduits.php" class="nav-link dropdown-link">Liste des produits</a></li>
-                    <li><a href="../vue/crudProduits/ajoutProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
+                    <li><a href="crudProduits/createProduit.php" class="nav-link dropdown-link">Ajouter un produit</a></li>
                     <li><a href="../vue/crudProduits/categories.php" class="nav-link dropdown-link">Catégories</a></li>
                 </ul>
             </li>
@@ -63,7 +63,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="crudCommandes/listeCommandes.php" class="nav-link dropdown-link">Historique</a></li>
-                    <li><a href="../vue/crudCommandes/ajoutCommandes.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
+                    <li><a href="crudCommandes/createCommande.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
                 </ul>
             </li>
 

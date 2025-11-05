@@ -12,7 +12,7 @@ $listeUrl = '../../vue/listeProduits.php';
 
 if ($id > 0) {
     $repo = new ProduitRepository();
-    $repo->delete($id);
+    $repo->suppProduit($id);
     header('Location: ' . $listeUrl . '?deleted=1');
     exit;
 }
