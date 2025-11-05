@@ -160,15 +160,22 @@ final class ProduitRepository
         return array_map(fn($row) => new Produit($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-
-    // Derniers produits
+    /**
+     * Récupère les derniers produits ajoutés
+     * 
+     * @param int $limit Nombre maximum de produits à retourner (par défaut 5)
+     * @return array Tableau de tableaux associatifs représentant les produits
+     */
     public function getDerniersProduits(int $limit = 5): array {
         $db = $this->db();
-        $st = $db->prepare('SELECT * FROM '.self::TABLE.' ORDER BY id_produit DESC LIMIT :lim');
+        $st = $db->prepare('SELECT p.*, c.nom as nom_categorie 
+                           FROM '.self::TABLE.' p 
+                           LEFT JOIN categorie c ON p.ref_categorie = c.id_categorie 
+                           ORDER BY p.id_produit DESC 
+                           LIMIT :lim');
         $st->bindValue(':lim', $limit, PDO::PARAM_INT);
         $st->execute();
-        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
-        return array_map(fn($r) => new Produit($r), $rows);
+        return $st->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Compter
