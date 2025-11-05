@@ -13,7 +13,7 @@ use PDO;
 
 final class ProduitRepository
 {
-    private const TABLE = 'produits';   // <-- IMPORTANT: au pluriel
+    private const TABLE = 'produit';    // aligné avec le schéma existant (singulier)
 
     private function db(): PDO {
         return (new Bdd())->getBdd();
@@ -107,16 +107,25 @@ final class ProduitRepository
     }
 
     /** Créer un produit minimal depuis le formulaire d'ajout */
-    public function create(string $nom, int $categorieId, int $quantite, float $prix): int {
+    public function create(
+        string $nom,
+        int $categorieId,
+        int $quantiteCentrale,
+        float $prix,
+        int $seuilAlerte,
+        string $dateAjout // format 'Y-m-d'
+    ): int {
         $pdo = $this->db();
-        $sql = "INSERT INTO ".self::TABLE." (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
-                VALUES (:nom, :cat, :qte, :prix)";
+        $sql = "INSERT INTO ".self::TABLE." (libelle, ref_categorie, quantite_centrale, prix_unitaire, seuil_alerte, date_ajout)
+                VALUES (:nom, :cat, :qte, :prix, :seuil, :date_ajout)";
         $st = $pdo->prepare($sql);
         $st->execute([
-            ':nom'  => $nom,
-            ':cat'  => $categorieId,
-            ':qte'  => $quantite,
-            ':prix' => $prix,
+            ':nom'        => $nom,
+            ':cat'        => $categorieId,
+            ':qte'        => $quantiteCentrale,
+            ':prix'       => $prix,
+            ':seuil'      => $seuilAlerte,
+            ':date_ajout' => $dateAjout,
         ]);
         return (int)$pdo->lastInsertId();
     }
