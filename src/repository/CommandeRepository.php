@@ -94,6 +94,24 @@ class CommandeRepository
         return $row ? new Commande($row) : null;
     }
 
+    /**
+     * Récupère les 10 dernières commandes dont l'état est 'en attente', 'préparée' ou 'expédiée'
+     *
+     * @return array Tableau d'objets Commande
+     */
+    public function getDernieresCommandesParEtat(): array {
+        $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
+            FROM commande c
+            LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
+            LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
+            WHERE c.etat IN ("en attente", "préparée", "expédiée")
+            ORDER BY c.date_commande DESC
+            LIMIT 10';
+            
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Récupérer toutes les commandes
     public function getAllCommandes(): array {
         $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
