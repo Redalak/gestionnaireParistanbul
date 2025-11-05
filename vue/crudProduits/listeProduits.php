@@ -3,8 +3,6 @@ require_once __DIR__ . '/../../src/repository/ProduitRepository.php';
 require_once __DIR__ . '/../../src/model/Produit.php';
 
 use repository\ProduitRepository;
-use model\Produit;
-
 $repo = new ProduitRepository();
 $produits = $repo->listeProduits();
 ?>

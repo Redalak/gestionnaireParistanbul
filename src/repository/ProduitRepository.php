@@ -28,54 +28,6 @@ final class ProduitRepository
      * Retourne des tableaux associatifs avec clés attendues par la vue:
      *  id, nom, categorie, quantite, prix_unitaire
      */
-    public function searchList(
-        string $search = '',
-        string $catFilter = '',
-        string $sortField = 'id',
-        string $sortDir = 'DESC'
-    ): array {
-        $pdo = $this->db();
-
-        // Whitelist colonnes de tri
-        $allowed = [
-            'id'            => 'p.id_produit',
-            'nom'           => 'p.libelle',
-            'quantite'      => 'p.nb_unite_pack',
-            'prix_unitaire' => 'p.prix_unitaire',
-        ];
-        $orderBy = $allowed[$sortField] ?? $allowed['id'];
-        $dir     = (strtoupper($sortDir) === 'ASC') ? 'ASC' : 'DESC';
-
-        $where  = [];
-        $params = [];
-
-        if ($search !== '') {
-            $where[] = '(p.libelle LIKE :q OR c.nom LIKE :q)';
-            $params[':q'] = '%'.$search.'%';
-        }
-        if ($catFilter !== '') {
-            $where[] = 'c.nom = :cat';
-            $params[':cat'] = $catFilter;
-        }
-        $sqlWhere = $where ? 'WHERE '.implode(' AND ', $where) : '';
-
-        $sql = "
-            SELECT
-                p.id_produit                 AS id,
-                p.libelle                    AS nom,
-                c.nom                        AS categorie,
-                COALESCE(p.nb_unite_pack,0)  AS quantite,
-                p.prix_unitaire
-            FROM ".self::TABLE." p
-            LEFT JOIN categorie c ON c.id_categorie = p.ref_categorie
-            $sqlWhere
-            ORDER BY $orderBy $dir, p.id_produit DESC
-        ";
-
-        $st = $pdo->prepare($sql);
-        $st->execute($params);
-        return $st->fetchAll(PDO::FETCH_ASSOC);
-    }
 
     /** Liste des noms de catégories pour le <select> filtre */
     public function allCategories(): array {
@@ -88,7 +40,7 @@ final class ProduitRepository
      * Trouver un produit pour updateProduit.php
      * Retourne un tableau normalisé: id, nom, categorie, quantite, prix_unitaire
      */
-    public function find(int $id): ?array {
+    public function findProduit(int $id): ?array {
         $pdo = $this->db();
         $st = $pdo->prepare("
             SELECT
@@ -97,7 +49,7 @@ final class ProduitRepository
                 COALESCE(c.nom, '')          AS categorie,
                 COALESCE(p.nb_unite_pack,0)  AS quantite,
                 p.prix_unitaire              AS prix_unitaire
-            FROM ".self::TABLE." p
+            FROM produit p
             LEFT JOIN categorie c ON c.id_categorie = p.ref_categorie
             WHERE p.id_produit = :id
         ");
@@ -107,9 +59,9 @@ final class ProduitRepository
     }
 
     /** Créer un produit minimal depuis le formulaire d'ajout */
-    public function create(string $nom, int $categorieId, int $quantite, float $prix): int {
+    public function createProduit(string $nom, int $categorieId, int $quantite, float $prix): int {
         $pdo = $this->db();
-        $sql = "INSERT INTO ".self::TABLE." (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
+        $sql = "INSERT INTO produit (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
                 VALUES (:nom, :cat, :qte, :prix)";
         $st = $pdo->prepare($sql);
         $st->execute([
@@ -122,70 +74,40 @@ final class ProduitRepository
     }
 
     /** Mettre à jour un produit depuis updateProduit.php */
-    public function update(int $id, string $nom, int $categorieId, int $quantite, float $prix): bool {
-        $pdo = $this->db();
-        $sql = "UPDATE ".self::TABLE." SET
-                    libelle = :nom,
-                    ref_categorie = :cat,
-                    nb_unite_pack = :qte,
-                    prix_unitaire = :prix
-                WHERE id_produit = :id";
-        $st = $pdo->prepare($sql);
-        return $st->execute([
-            ':id'   => $id,
-            ':nom'  => $nom,
-            ':cat'  => $categorieId,
-            ':qte'  => $quantite,
-            ':prix' => $prix,
-        ]);
-    }
 
     /** Supprimer un produit par ID (alias pratique) */
     public function delete(int $id): bool {
         $pdo = $this->db();
-        $st = $pdo->prepare('DELETE FROM '.self::TABLE.' WHERE id_produit = :id');
+        $st = $pdo->prepare('DELETE FROM produit WHERE id_produit = :id');
         return $st->execute([':id' => $id]);
     }
-
     /* ===================================
        ========== CRUD existants ==========
        =================================== */
-
     // Ajouter (table corrigée)
     public function ajoutProduit(Produit $produit): Produit {
         $db = $this->db();
         $req = $db->prepare('
-            INSERT INTO '.self::TABLE.' (
-                libelle, marque, origine, ref_sous_categorie, ref_categorie,
-                reference_produit, code_barre, unite_mesure, unite_ou_pack,
-                nb_unite_pack, bio, halal, vegan, prix_unitaire
+            INSERT INTO produit(
+                libelle,marque,quantite_centrale,prix_unitaire,seuil_alerte,ref_alerte,ref_categorie,date_ajout
             ) VALUES (
-                :libelle, :marque, :origine, :ref_sous_categorie, :ref_categorie,
-                :reference_produit, :code_barre, :unite_mesure, :unite_ou_pack,
-                :nb_unite_pack, :bio, :halal, :vegan, :prix_unitaire
+                :libelle,:marque,:quantite_centrale,:prix_unitaire,:seuil_alerte,:ref_categorie,:date_ajout
             )
         ');
         $req->execute([
             'libelle'            => $produit->getLibelle(),
             'marque'             => $produit->getMarque(),
-            'origine'            => $produit->getOrigine(),
-            'ref_sous_categorie' => $produit->getRefSousCategorie(),
-            'ref_categorie'      => $produit->getRefCategorie(),
-            'reference_produit'  => $produit->getReferenceProduit(),
-            'code_barre'         => $produit->getCodeBarre(),
-            'unite_mesure'       => $produit->getUniteMesure(),
-            'unite_ou_pack'      => $produit->getUniteOuPack(),
-            'nb_unite_pack'      => $produit->getNbUnitePack(),
-            'bio'                => $produit->getBio(),
-            'halal'              => $produit->getHalal(),
-            'vegan'              => $produit->getVegan(),
-            'prix_unitaire'      => $produit->getPrixUnitaire(),
+            'quantite_centrale'            => $produit->getQuantiteCentrale(),
+            'prix_unitaire' => $produit->getPrixUnitaire(),
+            'seuil_alerte'      => $produit->getSeuilAlerte(),
+            'ref_categorie'  => $produit->getRefCategorie(),
+            'date_ajout'         => $produit->getDateAjout(),
         ]);
         return $produit;
     }
-
     // Modifier
-    public function modifProduit(Produit $produit): Produit {
+    public function updateProduit(Produit $produit): bool
+    {
         $db = $this->db();
 
         $sql = "UPDATE produit SET
@@ -200,25 +122,24 @@ final class ProduitRepository
 
         $stmt = $db->prepare($sql);
 
-        $stmt->execute([
-            ':libelle' => $produit->getLibelle(),
-            ':marque' => $produit->getMarque(),
+        return $stmt->execute([
+            ':libelle'           => $produit->getLibelle(),
+            ':marque'            => $produit->getMarque(),
             ':quantite_centrale' => $produit->getQuantiteCentrale(),
-            ':prix_unitaire' => $produit->getPrixUnitaire(),
-            ':seuil_alerte' => $produit->getSeuilAlerte(),
-            ':ref_categorie' => $produit->getRefCategorie(),
-            ':date_ajout' => $produit->getDateAjout(),
-            ':id_produit' => $produit->getIdProduit()
+            ':prix_unitaire'     => $produit->getPrixUnitaire(),
+            ':seuil_alerte'      => $produit->getSeuilAlerte(),
+            ':ref_categorie'     => $produit->getRefCategorie(),
+            ':date_ajout'        => $produit->getDateAjout(),
+            ':id_produit'        => $produit->getIdProduit()
         ]);
-
-        return $produit;
     }
+
 
 
     // Supprimer
     public function suppProduit(int $idProduit): void {
         $db = $this->db();
-        $req = $db->prepare('DELETE FROM '.self::TABLE.' WHERE id_produit = :id_produit');
+        $req = $db->prepare('DELETE FROM produit WHERE id_produit = :id_produit');
         $req->execute(['id_produit' => $idProduit]);
     }
 

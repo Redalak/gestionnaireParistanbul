@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../../src/repository/ProduitRepository.php';
 require_once __DIR__ . '/../../src/repository/CategoriesRepository.php';
 require_once __DIR__ . '/../../src/model/Produit.php';
-
+require_once __DIR__ . '/../../src/model/Categorie.php';
 use repository\ProduitRepository;
 use repository\CategoriesRepository ;
 
@@ -162,8 +162,9 @@ $valueDate = ($produit && $produit->getDateAjout())
             </button>
         </div>
 
-        <form method="post" class="form-container" style="background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);>
+        <form method="post" action="../../src/traitement/traitementUpdateProduit.php" class="form-container" style="background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
             <input type="hidden" name="update_produit" value="1">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($produit->getIdProduit()) ?>">
 
             <div class="row">
                 <div class="col">
@@ -199,9 +200,8 @@ $valueDate = ($produit && $produit->getDateAjout())
                         <label for="categorie">Categorie :</label>
                         <select id="categorie" name="categorie" class="form-control" required>
                             <?php foreach ($categories as $categorie) : ?>
-                                <option value="<?= htmlspecialchars($categorie->getNom()) ?>"
-                                        <?= $categorie->getNom() === $produit->getRefCategorie() ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($categorie->getNom()) ?>
+                                <option name="ref_categorie" value="<?= $categorie->getIdCategorie() == $produit->getRefCategorie() ? 'selected' : '' ?>">
+
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -209,7 +209,7 @@ $valueDate = ($produit && $produit->getDateAjout())
 
                     <div class="form-group">
                         <label for="dateAjout">Date ajout :</label>
-                        <input type="date" id="dateAjout" name="dateAjout"
+                        <input type="date" id="dateAjout" name="date_ajout"
                                value="<?= htmlspecialchars($valueDate) ?>" required>
                     </div>
                 </div>
@@ -220,11 +220,8 @@ $valueDate = ($produit && $produit->getDateAjout())
                 <button class="btn btn-outline-primary" type="submit">Enregistrer les modifications</button>
                 <button  class="btn btn-outline-info" type="reset">Annuler les modifications</button>
             </div>
-
-
-        </form>
-
     </div>
+    </form>
 </main>
 </body>
 </html>
