@@ -4,13 +4,19 @@ require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/model/Commande.php';
 require_once __DIR__ . '/../src/repository/CommandeRepository.php';
 require_once __DIR__ . '/../src/repository/FactureRepository.php';
+require_once __DIR__ . '/../src/repository/ProduitRepository.php';
+require_once __DIR__ . '/../src/model/Produit.php';
 
 $commandeRepository = new \repository\CommandeRepository();
 $factureRepository = new \repository\FactureRepository();
+$produitRepository = new \repository\ProduitRepository();
 
 $dernieresCommandes = $commandeRepository->getDernieresCommandesParEtat();
 $facturesImpayees = $factureRepository->getFacturesImpayees();
 $nombreFacturesImpayees = count($facturesImpayees);
+$derniersProduits = $produitRepository->getDerniersProduits(12);
+$stockParCategorie = $produitRepository->getStockParCategorie();
+$produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -191,7 +197,7 @@ $nombreFacturesImpayees = count($facturesImpayees);
                 <li class="summary-item">
                     <span class="material-symbols-rounded">inventory</span>
                     <div>
-                        <div class="summary-value">Total produits en stock</div>
+                        <div class="summary-value"><?= $produitRepository->nbProduits() ?> produits</div>
                         <div class="summary-label">En attente de mise à jour</div>
                     </div>
                 </li>
@@ -212,7 +218,7 @@ $nombreFacturesImpayees = count($facturesImpayees);
                 <li class="summary-item">
                     <span class="material-symbols-rounded">warning</span>
                     <div>
-                        <div class="summary-value">Produits en alerte</div>
+                        <div class="summary-value"><?= $produitRepository->nbProduitsEnAlerte() ?> produits en alerte</div>
                         <div class="summary-label">Niveaux de stock bas</div>
                     </div>
                 </li>
@@ -373,8 +379,172 @@ $nombreFacturesImpayees = count($facturesImpayees);
                 <?php endif; ?>
             </div>
         </div>
+
+        <!-- Section Derniers produits -->
+        <div class="dashboard-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Derniers produits ajoutés</h2>
+                <div class="produit-counter" style="background-color: #f8f9fa; padding: 8px 15px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">inventory_2</span>
+                    <span><?= $produitRepository->nbProduits() ?> produits en stock</span>
+                </div>
+            </div>
+            
+            <div class="produits-list">
+                <?php if (!empty($derniersProduits)): ?>
+                    <table class="commandes-table">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Produit</th>
+                                <th>Marque</th>
+                                <th>Catégorie</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($derniersProduits as $produit): 
+                                $classeAlerte = ($produit['quantite_centrale'] <= $produit['seuil_alerte']) ? 'style="background-color: #fff3e0;"' : '';
+                            ?>
+                                <tr <?= $classeAlerte ?>>
+                                    <td>#<?= htmlspecialchars($produit['id_produit']) ?></td>
+                                    <td><?= htmlspecialchars($produit['libelle']) ?></td>
+                                    <td><?= htmlspecialchars($produit['marque'] ?? 'N/A') ?></td>
+                                    <td><?= htmlspecialchars($produit['nom_categorie'] ?? 'Non catégorisé') ?></td>
+                                    <td>
+                                        <span class="quantite-cell <?= $produit['quantite_centrale'] <= $produit['seuil_alerte'] ? 'quantite-alerte' : '' ?>">
+                                            <?= htmlspecialchars($produit['quantite_centrale']) ?>
+                                            <?php if ($produit['quantite_centrale'] <= $produit['seuil_alerte']): ?>
+                                                <span class="material-symbols-rounded" style="color: #f44336; font-size: 16px; vertical-align: middle; margin-left: 4px;">warning</span>
+                                            <?php endif; ?>
+                                        </span>
+                                    </td>
+                                    <td><?= number_format($produit['prix_unitaire'], 2, ',', ' ') ?> €</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>Aucun produit trouvé.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Section Stock par catégorie -->
+        <div class="dashboard-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Stock par catégorie</h2>
+                <div class="categorie-counter" style="background-color: #f8f9fa; padding: 8px 15px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">category</span>
+                    <span><?= count($stockParCategorie) ?> catégories</span>
+                </div>
+            </div>
+            
+            <div class="categories-list">
+                <?php if (!empty($stockParCategorie)): ?>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 15px;">
+                        <?php foreach ($stockParCategorie as $categorie): ?>
+                            <div style="background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h3 style="margin: 0; font-size: 1.1em; color: #333;">
+                                        <?= htmlspecialchars($categorie['categorie'] ?? 'Sans catégorie') ?>
+                                    </h3>
+                                    <span style="background: #e9ecef; padding: 2px 8px; border-radius: 12px; font-size: 0.85em;">
+                                        <?= (int)$categorie['nb_produits'] ?> produit<?= $categorie['nb_produits'] > 1 ? 's' : '' ?>
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="flex-grow: 1; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                        <?php 
+                                            $totalProduits = array_sum(array_column($stockParCategorie, 'quantite_totale'));
+                                            $pourcentage = $totalProduits > 0 ? ($categorie['quantite_totale'] / $totalProduits * 100) : 0;
+                                        ?>
+                                        <div style="height: 100%; width: <?= $pourcentage ?>%; background: #4e73df;"></div>
+                                    </div>
+                                    <span style="font-weight: 600; color: #4e73df;">
+                                        <?= (int)$categorie['quantite_totale'] ?>
+                                    </span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p>Aucune catégorie trouvée.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Section Produits sous le seuil d'alerte -->
+        <?php if (!empty($produitsSousSeuil)): ?>
+        <div class="dashboard-section" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Produits sous le seuil d'alerte</h2>
+                <div class="alerte-counter" style="background-color: #fff3e0; padding: 8px 15px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px; color: #e65100;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">warning</span>
+                    <span><?= count($produitsSousSeuil) ?> produit<?= count($produitsSousSeuil) > 1 ? 's' : '' ?> en alerte</span>
+                </div>
+            </div>
+            
+            <div class="produits-alerte-list">
+                <table class="commandes-table">
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Produit</th>
+                            <th>Catégorie</th>
+                            <th>Quantité actuelle</th>
+                            <th>Seuil d'alerte</th>
+                            <th>Écart</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($produitsSousSeuil as $produit): 
+                            $ecart = $produit['seuil_alerte'] - $produit['quantite_centrale'];
+                        ?>
+                            <tr style="background-color: #fff3e0;">
+                                <td>#<?= htmlspecialchars($produit['id_produit']) ?></td>
+                                <td><?= htmlspecialchars($produit['libelle']) ?></td>
+                                <td><?= htmlspecialchars($produit['nom_categorie'] ?? 'Non catégorisé') ?></td>
+                                <td style="color: #d32f2f; font-weight: 600;">
+                                    <?= (int)$produit['quantite_centrale'] ?>
+                                </td>
+                                <td><?= (int)$produit['seuil_alerte'] ?></td>
+                                <td style="color: #d32f2f; font-weight: 600;">
+                                    <?= $ecart > 0 ? '-'.$ecart : '0' ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
     </section>
 </main>
+
+<style>
+    .produits-list {
+        margin-top: 15px;
+    }
+    
+    .quantite-cell {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    
+    .quantite-alerte {
+        color: #d32f2f;
+        background-color: #ffebee;
+    }
+    
+    .commandes-table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
 
 <style>
     .factures-list {
