@@ -1,14 +1,70 @@
 <?php
 /* index.php — tableau de bord principal */
+require_once __DIR__ . '/../src/bdd/Bdd.php';
+require_once __DIR__ . '/../src/model/Commande.php';
+require_once __DIR__ . '/../src/repository/CommandeRepository.php';
+
+$commandeRepository = new \repository\CommandeRepository();
+$dernieresCommandes = $commandeRepository->getDernieresCommandesParEtat();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{{ ... }}
     <title>Paristanbul • Tableau de bord</title>
 
     <link rel="stylesheet" href="../src/assets/css/index.css" />
+    <style>
+        .dashboard-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .commandes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .commandes-table th,
+        .commandes-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .commandes-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .etat-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .etat-en attente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .etat-preparée, .etat-preparee {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .etat-expédiée, .etat-expediee {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 </head>
@@ -132,6 +188,48 @@
                 <li>Factures impayées</li>
                 <li>Produits presque en rupture</li>
             </ul>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Commandes récentes</h2>
+            <div class="commandes-list">
+                <?php if (!empty($dernieresCommandes)): ?>
+                    <table class="commandes-table">
+                        <thead>
+                            <tr>
+                                <th>N° Commande</th>
+                                <th>Date</th>
+                                <th>Magasin</th>
+                                <th>Utilisateur</th>
+                                <th>État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($dernieresCommandes as $commande): ?>
+                                <tr>
+                                    <td>#<?= htmlspecialchars($commande['id_commande']) ?></td>
+                                    <td><?= (new DateTime($commande['date_commande']))->format('d/m/Y H:i') ?></td>
+                                    <td><?= htmlspecialchars($commande['nom_magasin'] ?? 'N/A') ?></td>
+                                    <td>
+                                        <?= htmlspecialchars(
+                                            (!empty($commande['prenom_utilisateur']) || !empty($commande['nom_utilisateur'])) 
+                                                ? trim($commande['prenom_utilisateur'] . ' ' . $commande['nom_utilisateur'])
+                                                : 'N/A'
+                                        ) ?>
+                                    </td>
+                                    <td>
+                                        <span class="etat-badge etat-<?= strtolower(str_replace('é', 'e', $commande['etat'])) ?>">
+                                            <?= htmlspecialchars($commande['etat']) ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>Aucune commande récente.</p>
+                <?php endif; ?>
+            </div>
         </div>
 
         <div style="padding:40px">
