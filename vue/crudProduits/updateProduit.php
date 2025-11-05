@@ -42,6 +42,17 @@ $valueDate = ($produit && $produit->getDateAjout())
     <link rel="stylesheet" href="../../src/assets/css/updateProduit.css" />
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        .page-header { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid #e5e7eb; margin-bottom:12px; }
+        .page-header h2 { margin:0; font-size:22px; }
+        .btn-primary { background:#2563eb; color:#fff; border:none; border-radius:8px; padding:10px 14px; }
+        .btn-primary:hover { background:#1d4ed8; }
+        .btn-ghost { border:1px solid #d1d5db; background:#fff; color:#111827; border-radius:8px; padding:8px 12px; }
+        .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 1px 2px rgba(0,0,0,0.04); padding:20px; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { font-weight:600; margin-bottom:6px; display:block; }
+        .form-group input, .form-group select { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; }
+    </style>
 </head>
 
 <body>
@@ -150,19 +161,20 @@ $valueDate = ($produit && $produit->getDateAjout())
     </nav>
 </aside>
 <!-- CONTENU PRINCIPAL -->
-<main class="main-content">
+<main class="main-content" style="padding-right:16px;">
     <div>
-        <!-- Bandeau titre -->
-        <div class="offre-header d-flex justify-content-between align-items-center p-3 mb-4"
-              >
+        <!-- En-tête page -->
+        <div class="page-header">
             <h2 class="fw-bold mb-0">Modifier un produit</h2>
-            <button type="button" class="btn"
-                    onclick="window.location.href='../index.php'">
-                <i class="bi bi-arrow-left-circle"></i> Retour
-            </button>
+            <div style="display:flex; gap:10px;">
+                <a href="listeProduits.php" class="btn-ghost">← Retour à la liste</a>
+            </div>
         </div>
 
+
         <form method="post" action="../../src/traitement/traitementUpdateProduit.php" class="form-container" style="background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+        <form method="post" class="card form-container">
+
             <input type="hidden" name="update_produit" value="1">
             <input type="hidden" name="id" value="<?= htmlspecialchars($produit->getIdProduit()) ?>">
 
@@ -215,10 +227,10 @@ $valueDate = ($produit && $produit->getDateAjout())
                 </div>
             </div> <!-- fin row -->
 
-            <!-- Boutons côte à côte -->
-            <div class="form-group d-flex justify-content-end gap-2 mt-3">
-                <button class="btn btn-outline-primary" type="submit">Enregistrer les modifications</button>
-                <button  class="btn btn-outline-info" type="reset">Annuler les modifications</button>
+            <!-- Boutons -->
+            <div class="form-group d-flex justify-content-end gap-2 mt-3" style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn-primary" type="submit">Enregistrer les modifications</button>
+                <button  class="btn-ghost" type="reset">Annuler</button>
             </div>
     </div>
     </form>
