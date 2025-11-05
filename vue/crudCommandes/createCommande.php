@@ -148,7 +148,7 @@ $utilisateurs = $repoUser->getAllUsers();
         <h2 class="fw-bold mb-4 text-center text-primary">Nouvelle commande</h2>
 
 
-        <form method="post" class="p-5 bg-white rounded shadow-lg border border-light-subtle" style="font-size: 1.1rem;"
+        <form id="form-commande" method="post" class="p-5 bg-white rounded shadow-lg border border-light-subtle" style="font-size: 1.1rem;"
         action="../../src/traitement/traitementCreateCommande.php">
 
             <!-- Sélection du magasin -->
@@ -203,6 +203,39 @@ $utilisateurs = $repoUser->getAllUsers();
                           rows="4" placeholder="Ajoutez un commentaire..."></textarea>
             </div>
 
+            <!-- Produits / Panier -->
+            <hr class="my-4">
+            <h3 class="fw-bold mb-3">Produits</h3>
+            <div class="mb-3" style="position:relative;">
+                <label for="search-produit" class="form-label fw-semibold">Rechercher un produit</label>
+                <input type="text" id="search-produit" class="form-control form-control-lg" placeholder="Nom du produit...">
+                <div id="search-results" class="list-group" style="position:absolute; z-index:10; width:100%; max-height:240px; overflow:auto; display:none;"></div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="panier" class="table table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th class="text-end" style="width:140px;">Prix (€)</th>
+                        <th class="text-end" style="width:120px;">Qté</th>
+                        <th class="text-end" style="width:140px;">Remise (%)</th>
+                        <th class="text-end" style="width:160px;">Total ligne (€)</th>
+                        <th style="width:80px;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end gap-4 mt-3">
+                <div><strong>Sous-total:</strong> <span id="sous-total">0.00 €</span></div>
+                <div><strong>TVA (0%):</strong> <span id="tva-total">0.00 €</span></div>
+                <div><strong>Total:</strong> <span id="total-ttc">0.00 €</span></div>
+            </div>
+
+            <input type="hidden" name="lignes_json" id="lignes_json" value="[]">
+
             <!-- Boutons -->
             <div class="d-flex justify-content-between align-items-center mt-4">
                 <button type="button" class="btn btn-outline-secondary btn-lg"
@@ -220,3 +253,95 @@ $utilisateurs = $repoUser->getAllUsers();
 </body>
 </html>
 <script type="text/javascript" src="../../src/assets/js/index.js"> </script>
+<script>
+    (function(){
+        const apiUrl = '../../src/api/produits_search.php';
+        const $input = $('#search-produit');
+        const $results = $('#search-results');
+        const $tbody = $('#panier tbody');
+        const $sousTotal = $('#sous-total');
+        const $tvaTotal = $('#tva-total');
+        const $totalTTC = $('#total-ttc');
+        const $hidden = $('#lignes_json');
+
+        let debounceTimer = null;
+        let produitsCache = [];
+        let lignes = [];
+
+        function fmt(n){ return (Number(n)||0).toFixed(2); }
+
+        function renderLignes(){
+            $tbody.empty();
+            let st = 0;
+            lignes.forEach((l, idx) => {
+                const totalLigne = (l.prix_unitaire * l.quantite) * (1 - (l.remise||0)/100);
+                st += totalLigne;
+                const tr = $(
+                    `<tr>
+                        <td>${l.libelle}</td>
+                        <td class="text-end"><input type="number" class="form-control form-control-sm input-prix" step="0.01" min="0" value="${fmt(l.prix_unitaire)}"></td>
+                        <td class="text-end"><input type="number" class="form-control form-control-sm input-qty" step="1" min="1" value="${l.quantite}"></td>
+                        <td class="text-end"><input type="number" class="form-control form-control-sm input-remise" step="1" min="0" max="100" value="${l.remise||0}"></td>
+                        <td class="text-end total-ligne">${fmt(totalLigne)} €</td>
+                        <td><button class="btn btn-sm btn-danger btn-remove"><i class="bi bi-trash"></i></button></td>
+                    </tr>`);
+                tr.find('.input-prix').on('input', function(){ l.prix_unitaire = parseFloat(this.value)||0; renderLignes(); });
+                tr.find('.input-qty').on('input', function(){ l.quantite = Math.max(1, parseInt(this.value)||1); renderLignes(); });
+                tr.find('.input-remise').on('input', function(){ l.remise = Math.min(100, Math.max(0, parseFloat(this.value)||0)); renderLignes(); });
+                tr.find('.btn-remove').on('click', function(e){ e.preventDefault(); lignes.splice(idx,1); renderLignes(); });
+                $tbody.append(tr);
+            });
+            $sousTotal.text(fmt(st) + ' €');
+            $tvaTotal.text(fmt(0) + ' €');
+            $totalTTC.text(fmt(st) + ' €');
+            $hidden.val(JSON.stringify(lignes));
+        }
+
+        function showResults(list){
+            if(!list.length){ $results.hide(); return; }
+            $results.empty();
+            list.forEach(p => {
+                const item = $(`<a href="#" class="list-group-item list-group-item-action">${p.libelle} · <span class="text-muted">Stock: ${p.quantite_centrale}</span> · <strong>${fmt(p.prix_unitaire)} €</strong></a>`);
+                item.on('click', function(e){
+                    e.preventDefault();
+                    const exist = lignes.find(l => l.id_produit === p.id);
+                    if (exist) { exist.quantite += 1; }
+                    else {
+                        lignes.push({ id_produit: p.id, libelle: p.libelle, prix_unitaire: p.prix_unitaire, quantite: 1, remise: 0 });
+                    }
+                    $results.hide();
+                    $input.val('');
+                    renderLignes();
+                });
+                $results.append(item);
+            });
+            $results.show();
+        }
+
+        function searchProduits(q){
+            if (q.length < 2) { $results.hide(); return; }
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function(){
+                $.getJSON(apiUrl, { q }, function(resp){
+                    if (resp && resp.ok) {
+                        produitsCache = resp.produits || [];
+                        showResults(produitsCache.slice(0,20));
+                    } else {
+                        showResults([]);
+                    }
+                }).fail(function(){ showResults([]); });
+            }, 200);
+        }
+
+        $input.on('input', function(){ searchProduits(this.value.trim()); });
+        $(document).on('click', function(e){ if(!$(e.target).closest('#search-results, #search-produit').length) $results.hide(); });
+
+        $('#form-commande').on('submit', function(){
+            if (lignes.length === 0) {
+                if(!confirm('Aucune ligne produit. Continuer ?')) return false;
+            }
+            $hidden.val(JSON.stringify(lignes));
+            return true;
+        });
+    })();
+</script>

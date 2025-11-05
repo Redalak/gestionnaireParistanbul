@@ -248,7 +248,7 @@ foreach ($catPairs as $c) {
                         <a href="updateProduit.php?id=<?= $produit->getIdProduit() ?>" class="btn btn-sm btn-primary" title="Modifier">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <a href="deleteProduit.php?id=<?= $produit->getIdProduit() ?>"
+                        <a href="../../src/traitement/traitementDeleteProduit.php?id=<?= $produit->getIdProduit() ?>"
                            class="btn btn-sm btn-danger"
                            title="Supprimer"
                            onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?')">

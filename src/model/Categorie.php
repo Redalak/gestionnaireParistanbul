@@ -15,10 +15,10 @@ class Categorie
     private function hydrate(array $donnees): void
     {
         foreach ($donnees as $key => $value) {
-
-            $method = 'set'.ucfirst($key);
+            // Transforme id_categorie -> IdCategorie pour correspondre aux setters
+            $key = str_replace('_', '', ucwords($key, '_'));
+            $method = 'set' . $key;
             if (method_exists($this, $method)) {
-
                 $this->$method($value);
             }
         }

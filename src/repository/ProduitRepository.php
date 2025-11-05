@@ -47,7 +47,7 @@ final class ProduitRepository
                 p.id_produit                 AS id,
                 p.libelle                    AS nom,
                 COALESCE(c.nom, '')          AS categorie,
-                COALESCE(p.nb_unite_pack,0)  AS quantite,
+                COALESCE(p.quantite_centrale,0)  AS quantite,
                 p.prix_unitaire              AS prix_unitaire
             FROM produit p
             LEFT JOIN categorie c ON c.id_categorie = p.ref_categorie
@@ -58,13 +58,7 @@ final class ProduitRepository
         return $row ?: null;
     }
 
-    /** Créer un produit minimal depuis le formulaire d'ajout */
-<<<<<<< HEAD
-    public function createProduit(string $nom, int $categorieId, int $quantite, float $prix): int {
-        $pdo = $this->db();
-        $sql = "INSERT INTO produit (libelle, ref_categorie, nb_unite_pack, prix_unitaire)
-                VALUES (:nom, :cat, :qte, :prix)";
-=======
+    /** Créer un produit */
     public function create(
         string $nom,
         int $categorieId,
@@ -76,7 +70,6 @@ final class ProduitRepository
         $pdo = $this->db();
         $sql = "INSERT INTO ".self::TABLE." (libelle, ref_categorie, quantite_centrale, prix_unitaire, seuil_alerte, date_ajout)
                 VALUES (:nom, :cat, :qte, :prix, :seuil, :date_ajout)";
->>>>>>> cf9353fe786a6c3e2ee0e70669ae8e390c05263a
         $st = $pdo->prepare($sql);
         $st->execute([
             ':nom'        => $nom,
@@ -105,7 +98,7 @@ final class ProduitRepository
         $db = $this->db();
         $req = $db->prepare('
             INSERT INTO produit(
-                libelle,marque,quantite_centrale,prix_unitaire,seuil_alerte,ref_alerte,ref_categorie,date_ajout
+                libelle,marque,quantite_centrale,prix_unitaire,seuil_alerte,ref_categorie,date_ajout
             ) VALUES (
                 :libelle,:marque,:quantite_centrale,:prix_unitaire,:seuil_alerte,:ref_categorie,:date_ajout
             )
@@ -113,10 +106,10 @@ final class ProduitRepository
         $req->execute([
             'libelle'            => $produit->getLibelle(),
             'marque'             => $produit->getMarque(),
-            'quantite_centrale'            => $produit->getQuantiteCentrale(),
-            'prix_unitaire' => $produit->getPrixUnitaire(),
-            'seuil_alerte'      => $produit->getSeuilAlerte(),
-            'ref_categorie'  => $produit->getRefCategorie(),
+            'quantite_centrale'  => $produit->getQuantiteCentrale(),
+            'prix_unitaire'      => $produit->getPrixUnitaire(),
+            'seuil_alerte'       => $produit->getSeuilAlerte(),
+            'ref_categorie'      => $produit->getRefCategorie(),
             'date_ajout'         => $produit->getDateAjout(),
         ]);
         return $produit;
@@ -197,7 +190,7 @@ final class ProduitRepository
     // Recherche par libellé (objets)
     public function getProduitsParLibelle(string $libelle): array {
         $db = $this->db();
-        $st = $db->prepare('SELECT * FROM  WHERE libelle LIKE :q');
+        $st = $db->prepare('SELECT * FROM produit WHERE libelle LIKE :q');
         $st->execute([':q' => '%'.$libelle.'%']);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Produit($r), $rows);
@@ -206,7 +199,7 @@ final class ProduitRepository
     // Filtre par catégorie (objets)
     public function getProduitsParCategorie(int $refCategorie): array {
         $db = $this->db();
-        $st = $db->prepare('SELECT * FROM  WHERE ref_categorie = :c');
+        $st = $db->prepare('SELECT * FROM produit WHERE ref_categorie = :c');
         $st->execute([':c' => $refCategorie]);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Produit($r), $rows);

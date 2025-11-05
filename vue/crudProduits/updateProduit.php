@@ -12,7 +12,7 @@ use model\Produit;
 $id = (int)$_GET['id'] ;
 $repoProduit = new ProduitRepository();
 $repoCategorie = new CategoriesRepository();
-$categories = $repoCategorie ->listeCategories();
+$categories = $repoCategorie->pairs(); // retourne [ ['id_categorie'=>..., 'nom'=>...], ... ]
 $produit = $repoProduit->getProduitParId($id);
 
 $valueDate = ($produit && $produit->getDateAjout())
@@ -173,7 +173,6 @@ $valueDate = ($produit && $produit->getDateAjout())
 
 
         <form method="post" action="../../src/traitement/traitementUpdateProduit.php" class="form-container" style="background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
-        <form method="post" class="card form-container">
 
             <input type="hidden" name="update_produit" value="1">
             <input type="hidden" name="id" value="<?= htmlspecialchars($produit->getIdProduit()) ?>">
@@ -182,13 +181,13 @@ $valueDate = ($produit && $produit->getDateAjout())
                 <div class="col">
                     <div class="form-group">
                         <label for="libelle">Libelle :</label>
-                        <input type="text" id="libelle" name="libelle" class="form-control"
+                        <input type="text" id="libelle" name="libelle" class="form-control" maxlength="255"
                                value="<?= htmlspecialchars($produit->getLibelle()) ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="marque">Marque :</label>
-                        <input type="text" id="marque" name="marque" class="form-control"
-                               value="<?= htmlspecialchars($produit->getMarque()) ?>" required>
+                        <input type="text" id="marque" name="marque" class="form-control" maxlength="255"
+                               value="<?= htmlspecialchars((string)($produit->getMarque() ?? ''), ENT_QUOTES) ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="quantite">Quantité :</label>
@@ -211,9 +210,10 @@ $valueDate = ($produit && $produit->getDateAjout())
                     <div class="form-group">
                         <label for="categorie">Categorie :</label>
                         <select id="categorie" name="categorie" class="form-control" required>
-                            <?php foreach ($categories as $categorie) : ?>
-                                <option name="ref_categorie" value="<?= $categorie->getIdCategorie() == $produit->getRefCategorie() ? 'selected' : '' ?>">
-
+                            <?php foreach ($categories as $cat) : ?>
+                                <?php $idc = (int)$cat['id_categorie']; $selected = ($idc === (int)$produit->getRefCategorie()) ? 'selected' : ''; ?>
+                                <option value="<?= htmlspecialchars((string)$idc) ?>" <?= $selected ?>>
+                                    <?= htmlspecialchars($cat['nom']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
