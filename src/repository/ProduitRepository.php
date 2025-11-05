@@ -178,11 +178,44 @@ final class ProduitRepository
         return $st->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Compter
+    // Compter le nombre total de produits uniques
     public function nbProduits(): int {
         $db = $this->db();
-        $req = $db->query('SELECT COUNT(*) AS total FROM '.self::TABLE);
-        return (int)$req->fetch(PDO::FETCH_ASSOC)['total'];
+        $st = $db->query('SELECT COUNT(DISTINCT id_produit) as total FROM '.self::TABLE);
+        $result = $st->fetch(PDO::FETCH_ASSOC);
+        return (int)($result['total'] ?? 0);
+    }
+    
+    // Compter le nombre de produits en alerte de stock
+    public function nbProduitsEnAlerte(): int {
+        $db = $this->db();
+        $st = $db->query('SELECT COUNT(*) as total FROM '.self::TABLE.' WHERE quantite_centrale <= seuil_alerte');
+        $result = $st->fetch(PDO::FETCH_ASSOC);
+        return (int)($result['total'] ?? 0);
+    }
+    
+    // Récupérer les produits en dessous du seuil d'alerte
+    public function getProduitsSousSeuil(): array {
+        try {
+            $db = $this->db();
+            $sql = 'SELECT p.*, c.nom as nom_categorie 
+                    FROM '.self::TABLE.' p 
+                    LEFT JOIN categorie c ON p.ref_categorie = c.id_categorie 
+                    WHERE p.quantite_centrale <= p.seuil_alerte
+                    AND p.quantite_centrale IS NOT NULL
+                    ORDER BY p.quantite_centrale ASC';
+            
+            $st = $db->query($sql);
+            $result = $st->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Log pour le débogage
+            error_log('Produits sous seuil: ' . print_r($result, true));
+            
+            return $result;
+        } catch (\PDOException $e) {
+            error_log('Erreur dans getProduitsSousSeuil: ' . $e->getMessage());
+            return [];
+        }
     }
 
     // Récup produit par ID (objet)
@@ -210,5 +243,24 @@ final class ProduitRepository
         $st->execute([':c' => $refCategorie]);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Produit($r), $rows);
+    }
+
+    /**
+     * Récupère le stock total par catégorie
+     * @return array Tableau associatif [nom_catégorie => quantité_totale]
+     */
+    public function getStockParCategorie(): array {
+        $db = $this->db();
+        $sql = 'SELECT 
+                    c.nom as categorie,
+                    COUNT(p.id_produit) as nb_produits,
+                    SUM(p.quantite_centrale) as quantite_totale
+                FROM categorie c
+                LEFT JOIN produit p ON c.id_categorie = p.ref_categorie
+                GROUP BY c.id_categorie, c.nom
+                ORDER BY c.nom';
+        
+        $stmt = $db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
