@@ -99,6 +99,27 @@ class CommandeRepository
      *
      * @return array Tableau d'objets Commande
      */
+    /**
+     * Compte le nombre de commandes en cours (en attente, préparée ou expédiée)
+     *
+     * @return int Nombre de commandes en cours
+     */
+    public function countCommandesEnCours(): int {
+        $sql = 'SELECT COUNT(*) as total 
+                FROM commande 
+                WHERE etat IN ("en attente", "préparée", "expédiée")';
+                
+        $stmt = $this->db->query($sql);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return (int) ($result['total'] ?? 0);
+    }
+
+    /**
+     * Récupère les 10 dernières commandes dont l'état est 'en attente', 'préparée' ou 'expédiée'
+     *
+     * @return array Tableau de tableaux associatifs représentant les commandes
+     */
     public function getDernieresCommandesParEtat(): array {
         $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
             FROM commande c

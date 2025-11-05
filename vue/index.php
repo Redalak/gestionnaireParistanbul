@@ -3,9 +3,14 @@
 require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/model/Commande.php';
 require_once __DIR__ . '/../src/repository/CommandeRepository.php';
+require_once __DIR__ . '/../src/repository/FactureRepository.php';
 
 $commandeRepository = new \repository\CommandeRepository();
+$factureRepository = new \repository\FactureRepository();
+
 $dernieresCommandes = $commandeRepository->getDernieresCommandesParEtat();
+$facturesImpayees = $factureRepository->getFacturesImpayees();
+$nombreFacturesImpayees = count($facturesImpayees);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -182,16 +187,87 @@ $dernieresCommandes = $commandeRepository->getDernieresCommandesParEtat();
         <hr>
         <div style="padding:40px">
             <h2>Résumé du stock</h2>
-            <ul>
-                <li>Total produits en stock</li>
-                <li>Commandes en cours</li>
-                <li>Factures impayées</li>
-                <li>Produits presque en rupture</li>
+            <ul class="summary-list">
+                <li class="summary-item">
+                    <span class="material-symbols-rounded">inventory</span>
+                    <div>
+                        <div class="summary-value">Total produits en stock</div>
+                        <div class="summary-label">En attente de mise à jour</div>
+                    </div>
+                </li>
+                <li class="summary-item">
+                    <span class="material-symbols-rounded">shopping_cart</span>
+                    <div>
+                        <div class="summary-value"><?= $commandeRepository->countCommandesEnCours() ?> commandes</div>
+                        <div class="summary-label">En attente, préparées ou expédiées</div>
+                    </div>
+                </li>
+                <li class="summary-item">
+                    <span class="material-symbols-rounded">receipt_long</span>
+                    <div>
+                        <div class="summary-value"><?= $nombreFacturesImpayees ?> factures</div>
+                        <div class="summary-label">En attente de paiement</div>
+                    </div>
+                </li>
+                <li class="summary-item">
+                    <span class="material-symbols-rounded">warning</span>
+                    <div>
+                        <div class="summary-value">Produits en alerte</div>
+                        <div class="summary-label">Niveaux de stock bas</div>
+                    </div>
+                </li>
             </ul>
+            <style>
+                .summary-list {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 1rem;
+                    padding: 0;
+                    margin: 0;
+                    list-style: none;
+                }
+                .summary-item {
+                    background: white;
+                    border-radius: 8px;
+                    padding: 1.25rem;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    transition: transform 0.2s;
+                }
+                .summary-item:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+                .summary-item .material-symbols-rounded {
+                    font-size: 2rem;
+                    color: #4a6cf7;
+                    background: #eef2ff;
+                    padding: 0.75rem;
+                    border-radius: 50%;
+                }
+                .summary-value {
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    color: #1f2937;
+                }
+                .summary-label {
+                    font-size: 0.875rem;
+                    color: #6b7280;
+                    margin-top: 0.25rem;
+                }
+            </style>
         </div>
 
         <div class="dashboard-section">
-            <h2>Commandes récentes</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Commandes récentes</h2>
+                <div class="commande-counter" style="background-color: #f8f9fa; padding: 8px 15px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">shopping_cart</span>
+                    <span><?= $commandeRepository->countCommandesEnCours() ?> commandes en cours</span>
+                </div>
+            </div>
             <div class="commandes-list">
                 <?php if (!empty($dernieresCommandes)): ?>
                     <table class="commandes-table">
@@ -253,8 +329,68 @@ $dernieresCommandes = $commandeRepository->getDernieresCommandesParEtat();
                 <li>Commandes non livrées depuis longtemps</li>
             </ul>
         </div>
+
+        <!-- Section Factures impayées -->
+        <div class="dashboard-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Factures impayées</h2>
+                <div class="facture-counter" style="background-color: #f8f9fa; padding: 8px 15px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-rounded" style="font-size: 20px;">receipt_long</span>
+                    <span><?= $nombreFacturesImpayees ?> factures impayées</span>
+                </div>
+            </div>
+            
+            <div class="factures-list">
+                <?php if (!empty($facturesImpayees)): ?>
+                    <table class="commandes-table">
+                        <thead>
+                            <tr>
+                                <th>N° Facture</th>
+                                <th>Date d'émission</th>
+                                <th>N° Commande</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($facturesImpayees as $facture): ?>
+                                <tr>
+                                    <td>#<?= htmlspecialchars($facture['id_facture']) ?></td>
+                                    <td><?= (new DateTime($facture['date_emission']))->format('d/m/Y') ?></td>
+                                    <td>#<?= htmlspecialchars($facture['ref_commande'] ?? 'N/A') ?></td>
+                                    <td><?= number_format($facture['montant'], 2, ',', ' ') ?> €</td>
+                                    <td>
+                                        <span class="etat-badge etat-impayee">
+                                            <?= $facture['paye'] ? 'Payée' : 'Impayée' ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p>Aucune facture impayée.</p>
+                <?php endif; ?>
+            </div>
+        </div>
     </section>
 </main>
+
+<style>
+    .factures-list {
+        margin-top: 15px;
+    }
+    
+    .etat-impayee {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .etat-payee {
+        background-color: #d4edda;
+        color: #155724;
+    }
+</style>
 
 <footer>
     &copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock
