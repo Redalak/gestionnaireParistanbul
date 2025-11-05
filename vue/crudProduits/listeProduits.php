@@ -84,6 +84,69 @@ foreach ($catPairs as $c) {
         td.actions a.btn-danger { background:#ef4444; border:none; }
         .stats-bar { margin: 8px 0 14px 0; padding: 10px 12px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; color:#374151; }
         table.dataTable tbody tr { cursor: pointer; }
+        /* ===== Animations & design polish (no deps) ===== */
+        html { scroll-behavior: smooth; }
+        body { opacity: 0; transform: translateY(6px); animation: pageIn .5s ease forwards; }
+        @keyframes pageIn { to { opacity: 1; transform: none; } }
+
+        /* Sidebar slide */
+        .sidebar{ will-change: transform; transition: transform .28s ease; }
+        body.sidebar-collapsed .sidebar{ transform: translateX(-102%); }
+        @media (max-width:1024px){
+            .sidebar{ position:fixed; inset:0 auto 0 0; z-index:40; width:280px; transform:translateX(-102%); }
+            body.sidebar-open .sidebar{ transform:translateX(0); }
+            .sidebar-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.28); backdrop-filter: blur(2px);
+                opacity:0; pointer-events:none; transition:opacity .25s; z-index:30; }
+            body.sidebar-open .sidebar-overlay{ opacity:1; pointer-events:auto; }
+        }
+
+        /* Dropdown smooth */
+        .dropdown-container .dropdown-menu{
+            overflow:hidden; max-height:0; opacity:0; transform:translateY(-4px);
+            transition:max-height .28s ease, opacity .2s ease, transform .28s ease;
+        }
+        .dropdown-container.open .dropdown-menu{ max-height:480px; opacity:1; transform:translateY(0); }
+
+        /* Cards / table / toolbar subtle elevation */
+        .card,.toolbar,.stats-bar,table.dataTable{
+            transition: box-shadow .2s ease, transform .2s ease, background-color .2s ease, color .2s ease;
+        }
+        #liste-produits tbody tr{ animation: fadeUp .35s ease both; }
+        #liste-produits tbody tr:hover{ transform: scale(1.003); }
+        @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none;} }
+
+        /* Sticky toolbar on scroll */
+        .toolbar.is-sticky{
+            position: sticky; top: 8px; z-index: 5;
+            backdrop-filter: saturate(120%) blur(4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        }
+
+        /* Buttons: hover lift + ripple */
+        .btn-primary,.btn-ghost,.dt-button{ position:relative; overflow:hidden; }
+        .btn-primary:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,.25); }
+        .ripple{
+            position:absolute; border-radius:50%; width:8px; height:8px; background:rgba(255,255,255,.45);
+            transform: scale(0); animation: ripple .6s ease-out; pointer-events:none;
+        }
+        @keyframes ripple{ to{ transform: scale(22); opacity:0; } }
+
+        /* Badges: alerte stock bas */
+        .badge.low{
+            background:#fee2e2; color:#991b1b; border-color:#fecaca;
+            box-shadow:0 0 0 0 rgba(239,68,68,.45); animation: pulse 1.8s ease-out infinite;
+        }
+        @keyframes pulse{
+            0%{ box-shadow:0 0 0 0 rgba(239,68,68,.45); }
+            70%{ box-shadow:0 0 0 18px rgba(239,68,68,0); }
+            100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
+        }
+
+        /* KPIs dans la barre de stats */
+        .stats-bar .num{ font-variant-numeric: tabular-nums; font-weight:600; }
+
+        /* Respecte "préférences : réduit les animations" */
+        @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
     </style>
 </head>
 
@@ -381,6 +444,86 @@ foreach ($catPairs as $c) {
             const id = $(this).find('td').eq(0).text().trim();
             if (id) window.location.href = 'updateProduit.php?id=' + id;
         });
+    });
+</script>
+<script>
+    $(function () {
+        // Overlay pour mobile
+        if (!$('.sidebar-overlay').length) $('body').append('<div class="sidebar-overlay"></div>');
+
+        // Re-récupère l'instance DataTables existante
+        const table = $('#liste-produits').DataTable();
+
+        // Dropdown smooth
+        $(document).on('click', '.dropdown-toggle', function(e){
+            e.preventDefault();
+            $(this).closest('.dropdown-container').toggleClass('open');
+        });
+
+        // Sidebar toggles (desktop + mobile)
+        $('.sidebar-toggler').on('click', ()=> $('body').toggleClass('sidebar-collapsed'));
+        $('.sidebar-menu-button').on('click', ()=> $('body').addClass('sidebar-open'));
+        $(document).on('click', '.sidebar-overlay', ()=> $('body').removeClass('sidebar-open'));
+
+        // Ripple sur boutons (boutons page + DataTables)
+        $(document).on('click', '.btn-primary, .btn-ghost, .dt-button', function(e){
+            const $b = $(this), o = $b.offset();
+            const $r = $('<span class="ripple"/>').css({ left: e.pageX - o.left, top: e.pageY - o.top });
+            $b.append($r); setTimeout(()=> $r.remove(), 650);
+        });
+
+        // KPIs animés + badges "low stock" + apparition stagée
+        function enhance() {
+            // KPIs
+            const data = table.rows({ search:'applied' }).data();
+            let count = 0, sumQty = 0, sumVal = 0;
+            for (let i=0;i<data.length;i++){
+                const qty  = parseFloat(data[i][3]) || 0;
+                const prix = parseFloat(String(data[i][5]).replace(',', '.')) || 0;
+                sumQty += qty; sumVal += qty*prix; count++;
+            }
+            if (!$('#stats').hasClass('kpi-mode')){
+                $('#stats').addClass('kpi-mode').html(
+                    'Produits: <span id="kpi-count" class="num" data-val="0">0</span> • '+
+                    'Quantité: <span id="kpi-qty" class="num" data-val="0">0</span> • '+
+                    'Valeur: <span id="kpi-val" class="num" data-val="0">0</span> €'
+                );
+            }
+            animateNum($('#kpi-count'), count, 0);
+            animateNum($('#kpi-qty'),   sumQty, 0);
+            animateNum($('#kpi-val'),   +sumVal.toFixed(2), 2);
+
+            // Badges "low stock" + délai d'apparition en cascade
+            $('#liste-produits tbody tr').each(function(i){
+                const $tr = $(this), t = $tr.find('td');
+                const qty = parseFloat(t.eq(3).text()) || 0;
+                const seuil = parseFloat(t.eq(4).text()) || 0;
+                t.eq(2).find('.badge').toggleClass('low', (seuil > 0 && qty <= seuil));
+                $tr.css('animation-delay', (i*15) + 'ms');
+            });
+        }
+
+        function animateNum($el, to, decimals){
+            const from = parseFloat($el.data('val')) || 0;
+            const start = performance.now(), dur = 500;
+            function tick(now){
+                const p = Math.min(1, (now - start) / dur);
+                const val = from + (to - from) * p;
+                $el.text(val.toLocaleString(undefined, {
+                    minimumFractionDigits: decimals, maximumFractionDigits: decimals
+                }));
+                if (p < 1) requestAnimationFrame(tick); else $el.data('val', to);
+            }
+            requestAnimationFrame(tick);
+        }
+
+        // Relance à chaque draw
+        table.on('draw', enhance);
+        enhance();
+
+        // Toolbar sticky au scroll
+        const $toolbar = $('.toolbar'), top = $toolbar.offset().top;
+        $(window).on('scroll', ()=> $toolbar.toggleClass('is-sticky', window.scrollY > top - 8));
     });
 </script>
 <script type="text/javascript" src="../../src/assets/js/index.js"> </script>

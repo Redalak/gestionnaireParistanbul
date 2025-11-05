@@ -133,13 +133,43 @@ class CommandeRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Récupérer toutes les commandes
+    // Récupérer toutes les commandes avec totaux et facture liée (compat. ONLY_FULL_GROUP_BY)
     public function getAllCommandes(): array {
-        $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
+        $sql = "
+            SELECT
+              c.*,
+              m.nom AS nom_magasin,
+              u.nom AS nom_utilisateur,
+              u.prenom AS prenom_utilisateur,
+              COALESCE(cd_agg.montant_total, 0) AS montant_total,
+              COALESCE(cd_agg.nb_articles, 0)    AS nb_articles,
+              COALESCE(cd_agg.nb_lignes, 0)      AS nb_lignes,
+              f_last.id_facture,
+              f_last.montant AS montant_facture,
+              f_last.paye    AS facture_payee
             FROM commande c
-            LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
-            LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
-            ORDER BY c.date_commande DESC';
+            LEFT JOIN magasin m    ON m.id_magasin = c.ref_magasin
+            LEFT JOIN utilisateur u ON u.id_user   = c.ref_utilisateur
+            LEFT JOIN (
+              SELECT
+                ref_commande,
+                SUM(quantite * prix_unitaire) AS montant_total,
+                SUM(quantite)                 AS nb_articles,
+                COUNT(*)                      AS nb_lignes
+              FROM commande_detail
+              GROUP BY ref_commande
+            ) cd_agg ON cd_agg.ref_commande = c.id_commande
+            LEFT JOIN (
+              SELECT f1.*
+              FROM facture f1
+              INNER JOIN (
+                SELECT ref_commande, MAX(id_facture) AS max_id
+                FROM facture
+                GROUP BY ref_commande
+              ) fm ON fm.ref_commande = f1.ref_commande AND fm.max_id = f1.id_facture
+            ) f_last ON f_last.ref_commande = c.id_commande
+            ORDER BY c.date_commande DESC
+        ";
         $stmt = $this->db->query($sql);
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
