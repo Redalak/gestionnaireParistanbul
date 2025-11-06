@@ -1,14 +1,15 @@
 <?php
 /* statistiques.php */
+require_once __DIR__ . '/../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
+
 require_once __DIR__ . '/../src/bdd/Bdd.php';
 
 use bdd\Bdd;
 use repository\CommandeRepository;
 use repository\ProduitRepository;
 
-$pdo = (new Bdd())->getBdd();
-
-require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/repository/CommandeRepository.php';
 require_once __DIR__ . '/../src/repository/ProduitRepository.php';
 
@@ -42,7 +43,6 @@ $topProduitsJson = json_encode($topProduits);
 
 $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>

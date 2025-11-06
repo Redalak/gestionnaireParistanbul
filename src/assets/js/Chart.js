@@ -69,4 +69,19 @@ function renderCharts(data) {
         data:{labels:data.produitsParCategorie.map(d=>d.categorie), datasets:[{data:data.produitsParCategorie.map(d=>d.nb_produits), backgroundColor:['#FF9800','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40']}]},
         options:{responsive:true, plugins:{legend:{position:'bottom', labels:{font:{size:14,weight:'600'}, color:'#151A2D'}}}}
     });
+    const config = {
+        type: 'bar',
+        data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            devicePixelRatio: 2,
+            plugins: {
+                tooltip: {
+                    enabled: true
+                }
+            }
+        }
+    };
+
 }

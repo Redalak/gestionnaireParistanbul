@@ -1,5 +1,8 @@
 <?php
 /* index.php — tableau de bord principal */
+require_once __DIR__ . '/../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire','magasinier']);
 require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/model/Commande.php';
 require_once __DIR__ . '/../src/repository/CommandeRepository.php';

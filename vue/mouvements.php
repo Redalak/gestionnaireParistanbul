@@ -1,4 +1,8 @@
-<?php
+<?php  /*mouvements.php */
+require_once __DIR__ . '/../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
+
 require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/model/Mouvement.php';
 require_once __DIR__ . '/../src/repository/MouvementRepository.php';
@@ -40,7 +44,7 @@ $totalMouvements = count($mouvements);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mouvements de stock - Paristanbul</title>
-    <link rel="stylesheet" href="../../src/assets/css/index.css" />
+    <link rel="stylesheet" href="../src/assets/css/index.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
     <style>
@@ -530,6 +534,6 @@ $totalMouvements = count($mouvements);
     });
 </script>
 
-<script type="text/javascript" src="../../src/assets/js/index.js"></script>
+<script type="text/javascript" src="../src/assets/js/index.js"></script>
 </body>
 </html>

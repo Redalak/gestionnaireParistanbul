@@ -1,5 +1,13 @@
 <?php
 /* profil.php */
+require_once __DIR__ . '/../../src/auth/Auth.php';
+require_once __DIR__ . '/../../src/repository/UserRepository.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin']);
+use repository\UserRepository;
+$repoUser = new UserRepository();
+$all = $repoUser->getAllUsers();
+$pending = array_values(array_filter($all, function($u){ return ($u['role'] ?? '') === 'pending'; }));
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -123,14 +131,68 @@
 <main class="main-content">
     <hr>
     <div style="padding:50px">
-        <h1> Gestion des utilisateurs </h1>
+        <h1> Gestion des utilisateurs</h1>
+        <h2 style="margin-top:20px;">Comptes en attente</h2>
+        <?php if (!$pending): ?>
+            <p>Aucun compte en attente.</p>
+        <?php else: ?>
+            <table class="table" style="background:white; border-radius:8px;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Rôle demandé</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($pending as $u): ?>
+                    <tr>
+                        <td><?= (int)$u['id_user'] ?></td>
+                        <td><?= htmlspecialchars(($u['prenom'] ?? '').' '.($u['nom'] ?? '')) ?></td>
+                        <td><?= htmlspecialchars($u['email'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($u['poste'] ?? 'magasinier') ?></td>
+                        <td>
+                            <button class="btn-approve" data-id="<?= (int)$u['id_user'] ?>">Approuver</button>
+                            <button class="btn-reject" data-id="<?= (int)$u['id_user'] ?>">Refuser</button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
     </div>
     <hr>
-
-
 
     <footer>&copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock</footer>
 </main>
 </body>
 </html>
 <script type="text/javascript" src="../../src/assets/js/index.js"> </script>
+<script>
+document.addEventListener('click', async (e) => {
+  const approveBtn = e.target.closest('.btn-approve');
+  const rejectBtn = e.target.closest('.btn-reject');
+  if (!approveBtn && !rejectBtn) return;
+  const id = parseInt((approveBtn||rejectBtn).dataset.id, 10) || 0;
+  if (!id) return;
+  const action = approveBtn ? 'approve' : 'reject';
+  if (action === 'reject' && !confirm('Refuser et supprimer ce compte ?')) return;
+  try {
+    const resp = await fetch('../../src/api/user_approve.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_user: id, action })
+    });
+    const json = await resp.json();
+    if (json && json.ok) {
+      location.reload();
+    } else {
+      alert('Action échouée' + (json && json.error ? (' : ' + json.error) : ''));
+    }
+  } catch(err) {
+    alert('Erreur réseau');
+  }
+});
+</script>
