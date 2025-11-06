@@ -57,12 +57,37 @@ $commandes = $repoCommandes ->getAllCommandes() ;
         .dataTables_wrapper .dt-buttons .dt-button { background: #fff; color: #111827; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; }
         .dataTables_wrapper .dt-buttons .dt-button:hover { background: #f8fafc; }
         .badge { display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid transparent; }
+        /* Actions: éviter chevauchement */
+        td.actions { white-space: nowrap; }
+        td.actions a.btn { display:inline-flex; align-items:center; justify-content:center; margin-right:6px; }
+        td.actions a.btn:last-child { margin-right:0; }
         .etat-en_attente { background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
         .etat-préparée { background:#ecfeff; color:#155e75; border-color:#a5f3fc; }
         .etat-expédiée { background:#eef2ff; color:#3730a3; border-color:#c7d2fe; }
         .etat-livrée { background:#ecfdf5; color:#065f46; border-color:#a7f3d0; }
         .etat-annulée { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
         .stats-bar { margin: 8px 0 14px 0; padding: 10px 12px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; color:#374151; }
+        /* Détails (+) */
+        #liste-commandes td.details-control{ width:34px; text-align:center; cursor:pointer; }
+        #liste-commandes td.details-control::before{ content:"➕"; font-size:14px; opacity:.7; }
+        #liste-commandes tr.shown td.details-control::before{ content:"➖"; }
+
+        /* Panneau enfant */
+        .cmd-child{ padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; }
+        .cmd-child .grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .cmd-child .actions{ display:flex; gap:8px; margin-top:10px; }
+        .cmd-child .btn-ghost{ border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; }
+
+        /* Chips statut (filtres rapides) */
+        .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 6px; }
+        .chip{ padding:6px 10px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; font-size:13px; }
+        .chip.active{ border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.10) inset; }
+        .chip .count{ opacity:.7; margin-left:6px; }
+
+        /* Progression de statut (4 étapes) */
+        .status-progress{ display:inline-grid; grid-auto-flow:column; gap:5px; align-items:center; margin-left:6px; }
+        .status-progress .dot{ width:7px; height:7px; border-radius:999px; background:#d1d5db; }
+        .status-progress .dot.on{ background:#60a5fa; }
     </style>
 </head>
 
@@ -215,39 +240,81 @@ $commandes = $repoCommandes ->getAllCommandes() ;
             <button id="date-reset" type="button" class="btn-ghost">Réinitialiser</button>
         </div>
     </div>
-    <div id="stats" class="stats-bar">Chargement des statistiques…</div>
+    </div> <!-- fin .toolbar -->
+
+    <div id="chips" class="chips">
+        <span class="chip" data-etat="">Tous <span class="count"></span></span>
+        <span class="chip" data-etat="en attente">En attente <span class="count"></span></span>
+        <span class="chip" data-etat="préparée">Préparée <span class="count"></span></span>
+        <span class="chip" data-etat="expédiée">Expédiée <span class="count"></span></span>
+        <span class="chip" data-etat="livrée">Livrée <span class="count"></span></span>
+        <span class="chip" data-etat="annulée">Annulée <span class="count"></span></span>
+    </div>
+
+    
     <div class="table-responsive">
         <table id="liste-commandes">
             <thead>
             <tr>
+                <th></th> <!-- + détails -->
                 <th>ID</th>
                 <th>Magasin</th>
                 <th>Utilisateur</th>
                 <th>Date_commande</th>
                 <th>Etat</th>
                 <th>Commentaire</th>
+                <th>Montant total (€)</th>
+                <th>Articles</th>
+                <th>Lignes</th>
+                <th>Facture</th>
                 <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <?php foreach($commandes as $commande): ?>
                 <tr>
+                    <td class="details-control"></td>
                     <td><?= $commande['id_commande']?></td>
                     <td><?= $commande['nom_magasin']?></td>
                     <td><?= $commande['nom_utilisateur']?></td>
                     <td><?= $commande['date_commande']?></td>
-                    <td><span class="badge etat-<?= htmlspecialchars(str_replace(' ', '_', strtolower($commande['etat']))) ?>"><?= htmlspecialchars($commande['etat']) ?></span></td>
+                    <td>
+    <span class="badge etat-<?= htmlspecialchars(str_replace(' ', '_', strtolower($commande['etat']))) ?> js-etat-badge">
+      <?= htmlspecialchars($commande['etat']) ?>
+    </span>
+    <br/>
+    <select class="etat-select" data-id="<?= (int)$commande['id_commande']?>">
+        <?php foreach (['en attente','préparée','expédiée','livrée','annulée'] as $opt): ?>
+            <option value="<?= $opt ?>" <?= ($commande['etat'] === $opt ? 'selected' : '') ?>><?= $opt ?></option>
+        <?php endforeach; ?>
+    </select>
+                        <!-- progression visuelle -->
+                        <span class="status-progress" data-etat="<?= htmlspecialchars(strtolower($commande['etat'])) ?>">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </span>
+                    </td>
                     <td><?= $commande['commentaire'] ?></td>
-
+                    <td><?= number_format((float)($commande['montant_total'] ?? 0), 2, ',', ' ') ?></td>
+                    <td><?= (int)($commande['nb_articles'] ?? 0) ?></td>
+                    <td><?= (int)($commande['nb_lignes'] ?? 0) ?></td>
+                    <td>
+                        <?php if (!empty($commande['id_facture'])): ?>
+                            <a href="../../vue/crudFactures/factures.php?ref_commande=<?= (int)$commande['id_commande']?>" title="Voir facture #<?= (int)$commande['id_facture'] ?>">
+                                <i class="bi bi-receipt"></i> #<?= (int)$commande['id_facture'] ?>
+                            </a>
+                        <?php else: ?>
+                            —
+                        <?php endif; ?>
+                    </td>
                     <td class="actions">
-                        <a href="updateCommande.php?id=<?= $commande['id_commande']?>" class="btn btn-sm btn-primary" title="Modifier">
-                            <i class="bi bi-pencil"></i>
+                        <a href="../../src/traitement/pdf_bc.php?id=<?= (int)$commande['id_commande']?>" class="btn btn-sm btn-ghost" title="Bon de commande (PDF)">
+                            <i class="bi bi-file-earmark-text"></i>
                         </a>
-                        <a href="deleteCommande.php?id=<?= $commande['id_commande'] ?>"
-                           class="btn btn-sm btn-danger"
-                           title="Supprimer"
-                           onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?')">
-                            <i class="bi bi-trash"></i>
+                        <a href="../../src/traitement/pdf_bl.php?id=<?= (int)$commande['id_commande']?>" class="btn btn-sm btn-ghost" title="Bon de livraison (PDF)">
+                            <i class="bi bi-truck"></i>
+                        </a>
+                        <a href="../../src/traitement/pdf_facture.php?id=<?= (int)$commande['id_commande']?>" class="btn btn-sm btn-ghost" title="Facture (PDF)">
+                            <i class="bi bi-receipt"></i>
                         </a>
                     </td>
                 </tr>
@@ -265,12 +332,10 @@ $commandes = $repoCommandes ->getAllCommandes() ;
 <!-- Datatable JS id="offre-table" -->
 <script>
     $(document).ready(function () {
-        // Filtre date personnalisé (colonne 3)
+        /* ----- Filtre date personnalisé (colonne 4 devient index 4 → 0:+,1:ID,2:Magasin,3:User,4:Date) ----- */
         $.fn.dataTable.ext.search.push(function(settings, data) {
-            const min = $('#date-min').val();
-            const max = $('#date-max').val();
-            // data[3] contient "YYYY-MM-DD HH:MM:SS" => on ne prend que la date
-            const rowDateStr = (data[3] || '').toString().substring(0,10);
+            const min = $('#date-min').val(), max = $('#date-max').val();
+            const rowDateStr = (data[4] || '').toString().substring(0,10);
             if (!min && !max) return true;
             if (min && rowDateStr < min) return false;
             if (max && rowDateStr > max) return false;
@@ -278,61 +343,60 @@ $commandes = $repoCommandes ->getAllCommandes() ;
         });
 
         const table = $('#liste-commandes').DataTable({
-            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json" },
-            "pageLength": 10,
-            "ordering": true,
-            "searching": true,
-            "responsive": true,
-            "dom": '<"top"fB>rt<"bottom"lip><"clear">',
-            "buttons": [
+            language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json" },
+            pageLength: 10, ordering: true, searching: true, responsive: true,
+            dom: '<"top"fB>rt<"bottom"lip><"clear">',
+            buttons: [
                 { extend: 'copyHtml5', text: 'Copier' },
                 { extend: 'csvHtml5', text: 'CSV', title: 'commandes' },
                 { extend: 'excelHtml5', text: 'Excel', title: 'commandes' },
                 { extend: 'pdfHtml5', text: 'PDF', title: 'commandes', orientation: 'landscape', pageSize: 'A4' },
                 { extend: 'print', text: 'Imprimer', title: 'Liste des commandes' },
                 { extend: 'colvis', text: 'Colonnes' }
+            ],
+            columnDefs: [
+                { targets: 0, className: 'details-control', orderable: false },
             ]
         });
 
-        // Filtre par utilisateur (colonne 2)
+        /* ----- Filtre par utilisateur (col 3) ----- */
         $('#filtre-user').on('change', function() {
             const val = $(this).val();
-            if (val) {
-                table.column(2).search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
-            } else {
-                table.column(2).search('').draw();
-            }
+            table.column(3).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
             localStorage.setItem('cmd_user', val || '');
         });
 
-        // Filtre par état (colonne 4)
-        $('#filtre-etat').on('change', function() {
-            const val = $(this).val();
-            if (val) {
-                table.column(4).search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
-            } else {
-                table.column(4).search('').draw();
-            }
+        /* ----- Filtre par état (col 5) ----- */
+        function setEtatFilter(val){
+            table.column(5).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
             localStorage.setItem('cmd_etat', val || '');
+            // chips UI
+            $('#chips .chip').removeClass('active')
+                .filter('[data-etat="'+(val||'')+'"]').addClass('active');
+        }
+        $('#filtre-etat').on('change', function(){ setEtatFilter($(this).val()); });
+
+        /* ----- Chips de statut ----- */
+        $('#chips').on('click', '.chip', function(){
+            const v = $(this).data('etat') || '';
+            $('#filtre-etat').val(v);
+            setEtatFilter(v);
         });
 
-        // Filtre par date
+        /* ----- Filtre date ----- */
         $('#date-min, #date-max').on('change', function() {
             table.draw();
             localStorage.setItem('cmd_date_min', $('#date-min').val());
             localStorage.setItem('cmd_date_max', $('#date-max').val());
         });
         $('#date-reset').on('click', function() {
-            $('#date-min').val('');
-            $('#date-max').val('');
-            table.draw();
-            localStorage.removeItem('cmd_date_min');
-            localStorage.removeItem('cmd_date_max');
+            $('#date-min').val(''); $('#date-max').val(''); table.draw();
+            localStorage.removeItem('cmd_date_min'); localStorage.removeItem('cmd_date_max');
         });
 
-        // Restaurer filtres
+        /* ----- Restaurer filtres ----- */
         const se = localStorage.getItem('cmd_etat') || '';
-        if (se) { $('#filtre-etat').val(se).trigger('change'); }
+        if (se) { $('#filtre-etat').val(se); setEtatFilter(se); }
         const su = localStorage.getItem('cmd_user') || '';
         if (su) { $('#filtre-user').val(su).trigger('change'); }
         const dmin = localStorage.getItem('cmd_date_min') || '';
@@ -341,28 +405,112 @@ $commandes = $repoCommandes ->getAllCommandes() ;
         if (dmax) $('#date-max').val(dmax);
         if (dmin || dmax) table.draw();
 
-        // Stats
-        function updateStats() {
+        /* ----- Chips counts + progression visuelle ----- */
+        function updateUI() {
             const data = table.rows({ search: 'applied' }).data();
-            const count = data.length;
-            // Regrouper par état
-            const byEtat = {};
-            for (let i = 0; i < data.length; i++) {
-                const etat = $(data[i][4]).text() || data[i][4];
+            const byEtat = {}, stepsMap = { 'en attente':1, 'préparée':2, 'expédiée':3, 'livrée':4, 'annulée':0 };
+            for (let i=0; i<data.length; i++){
+                // col 5 contient le badge avec le texte
+                const etat = $('<div>').html(data[i][5]).text().trim().toLowerCase();
                 byEtat[etat] = (byEtat[etat] || 0) + 1;
             }
-            const parts = [count + ' commande(s)'];
-            Object.keys(byEtat).forEach(k => parts.push(k + ': ' + byEtat[k]));
-            $('#stats').text(parts.join(' — '));
-        }
-        table.on('draw', updateStats);
-        updateStats();
+            // MAJ des chips (compteurs)
+            const count = data.length;
+            $('#chips .chip').each(function(){
+                const key = (($(this).data('etat')||'')+'').toLowerCase();
+                const n = key ? (byEtat[key] || 0) : count;
+                $(this).find('.count').text(n ? '('+n+')' : '');
+            });
 
-        // Lignes cliquables (sauf clic actions)
+            // Progression visuelle dots (par badge)
+            $('#liste-commandes tbody tr').each(function(){
+                const $row = $(this);
+                const etat = $row.find('td').eq(5).find('.badge').text().trim().toLowerCase();
+                const step = stepsMap[etat] ?? 0;
+                const $dots = $row.find('.status-progress .dot');
+                $dots.removeClass('on').slice(0, step).addClass('on');
+            });
+        }
+        table.on('draw', updateUI); updateUI();
+
+        /* ----- Détails extensibles (+) ----- */
+        function childTemplate($tr){
+            const t = $tr.find('td');
+            const id = t.eq(1).text().trim();
+            const magasin = t.eq(2).text().trim();
+            const user = t.eq(3).text().trim();
+            const date = t.eq(4).text().trim();
+            const etatHtml = t.eq(5).html();
+            const commentaire = t.eq(6).text().trim() || '—';
+            // récupère les liens d’action existants
+            const $actionsCell = t.eq(11); // actions column index after adding new columns
+            const editHref = $actionsCell.find('a.btn-primary').attr('href') || '#';
+            const delHref  = $actionsCell.find('a.btn-danger').attr('href') || '#';
+
+            return `
+      <div class="cmd-child">
+        <div class="grid">
+          <div><strong>ID :</strong> ${id}</div>
+          <div><strong>Date :</strong> ${date}</div>
+          <div><strong>Magasin :</strong> ${magasin}</div>
+          <div><strong>Utilisateur :</strong> ${user}</div>
+          <div><strong>Etat :</strong> ${etatHtml}</div>
+          <div><strong>Commentaire :</strong> ${$('<div>').text(commentaire).html()}</div>
+        </div>
+        <div class="actions">
+          <a class="btn-ghost" href="${editHref}"><i class="bi bi-pencil"></i> Modifier</a>
+          <a class="btn-ghost" href="${delHref}" onclick="return confirm('Supprimer cette commande ?')">
+            <i class="bi bi-trash"></i> Supprimer
+          </a>
+        </div>
+      </div>`;
+        }
+
+        $('#liste-commandes tbody').on('click','td.details-control', function(e){
+            e.stopPropagation();
+            const tr = $(this).closest('tr');
+            const row = table.row(tr);
+            if(row.child.isShown()){ row.child.hide(); tr.removeClass('shown'); }
+            else { row.child(childTemplate(tr)).show(); tr.addClass('shown'); }
+        });
+
+        /* ----- Lignes cliquables (redirige vers édition) — ID en col 1 désormais ----- */
         $('#liste-commandes tbody').on('click', 'tr', function(e) {
-            if ($(e.target).closest('a, button, i').length) return;
-            const id = $(this).find('td').eq(0).text().trim();
+            if ($(e.target).closest('a, button, i, td.details-control, select.etat-select').length) return;
+            const id = $(this).find('td').eq(1).text().trim();
             if (id) window.location.href = 'updateCommande.php?id=' + id;
+        });
+
+        /* ----- Inline change statut (AJAX) ----- */
+        $(document).on('change', 'select.etat-select', function(){
+            const $sel = $(this);
+            const id = parseInt($sel.data('id'), 10) || 0;
+            const etat = $sel.val();
+            if (!id || !etat) return;
+            $.ajax({
+                url: '../../src/api/commande_update_statut.php',
+                method: 'POST',
+                data: { id_commande: id, etat },
+                dataType: 'json'
+            }).done(function(resp){
+                if (resp && resp.ok) {
+                    // maj badge + progression
+                    const $row = $sel.closest('tr');
+                    const css = ('etat-' + String(etat).toLowerCase().replace(/\s+/g,'_'));
+                    const $badge = $row.find('.js-etat-badge');
+                    $badge.text(etat)
+                          .attr('class', 'badge js-etat-badge ' + css);
+                    // progression dots
+                    const stepsMap = { 'en attente':1, 'préparée':2, 'expédiée':3, 'livrée':4, 'annulée':0 };
+                    const step = stepsMap[String(etat).toLowerCase()] ?? 0;
+                    const $dots = $row.find('.status-progress .dot');
+                    $dots.removeClass('on').slice(0, step).addClass('on');
+                } else {
+                    alert('Mise à jour du statut échouée');
+                }
+            }).fail(function(){
+                alert('Erreur réseau / serveur lors de la mise à jour du statut');
+            });
         });
     });
 </script>
