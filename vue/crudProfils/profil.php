@@ -2,11 +2,15 @@
 /* profil.php */
 require_once __DIR__ . '/../../src/auth/Auth.php';
 require_once __DIR__ . '/../../src/repository/UserRepository.php';
+require_once __DIR__ . '/../../src/repository/MagasinsRepository.php';
 \auth\Auth::startSession();
 \auth\Auth::requireAnyRole(['admin']);
 use repository\UserRepository;
+use repository\MagasinsRepository;
 $repoUser = new UserRepository();
 $pending = $repoUser->getPendingUsers();
+$magRepo = new MagasinsRepository();
+$magPairs = $magRepo->pairs();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -141,7 +145,8 @@ $pending = $repoUser->getPendingUsers();
                         <th>ID</th>
                         <th>Nom</th>
                         <th>Email</th>
-                        <th>Rôle demandé</th>
+                        <th>Rôle</th>
+                        <th>Affecter magasin</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -151,7 +156,17 @@ $pending = $repoUser->getPendingUsers();
                         <td><?= (int)$u['id_user'] ?></td>
                         <td><?= htmlspecialchars(($u['prenom'] ?? '').' '.($u['nom'] ?? '')) ?></td>
                         <td><?= htmlspecialchars($u['email'] ?? '') ?></td>
-                        <td><?= htmlspecialchars($u['poste'] ?? 'magasinier') ?></td>
+                        <td><?= htmlspecialchars($u['role'] ?? 'magasinier') ?></td>
+                        <td>
+                            <select class="select-magasin" data-id="<?= (int)$u['id_user'] ?>">
+                                <option value="0">Aucun (0)</option>
+                                <?php foreach ($magPairs as $m): ?>
+                                    <option value="<?= (int)$m['id_magasin'] ?>">
+                                        <?= htmlspecialchars($m['nom'] . (isset($m['ville']) && $m['ville'] ? ' — '.$m['ville'] : '')) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
                         <td>
                             <button class="btn-approve" data-id="<?= (int)$u['id_user'] ?>">Approuver</button>
                             <button class="btn-reject" data-id="<?= (int)$u['id_user'] ?>">Refuser</button>
@@ -179,10 +194,15 @@ document.addEventListener('click', async (e) => {
   const action = approveBtn ? 'approve' : 'reject';
   if (action === 'reject' && !confirm('Refuser et supprimer ce compte ?')) return;
   try {
+    let ref_magasin = 0;
+    if (action === 'approve') {
+      const select = document.querySelector(`.select-magasin[data-id="${id}"]`);
+      if (select) ref_magasin = parseInt(select.value, 10) || 0;
+    }
     const resp = await fetch('../../src/api/user_approve.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id_user: id, action })
+      body: JSON.stringify({ id_user: id, action, ref_magasin })
     });
     const json = await resp.json();
     if (json && json.ok) {

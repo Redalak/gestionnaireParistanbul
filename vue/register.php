@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $prenom = trim((string)($_POST['prenom'] ?? ''));
     $email = trim((string)($_POST['email'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
-    $genre = trim((string)($_POST['genre'] ?? '')); // optional
     $requestedRole = (string)($_POST['role'] ?? 'magasinier');
 
     if ($nom === '' || $prenom === '' || $email === '' || $password === '') {
@@ -39,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'prenom' => $prenom,
                 'email' => $email,
                 'password' => $password,
-                'genre' => $genre,
                 'requestedRole' => $requestedRole,
             ]));
             exit;
@@ -86,8 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="password" class="form-control" name="password" required />
               </div>
               <div class="mb-3">
-                <label class="form-label">Genre (optionnel)</label>
-                <input type="text" class="form-control" name="genre" />
+                
               </div>
               <div class="mb-3">
                 <label class="form-label">Rôle souhaité</label>

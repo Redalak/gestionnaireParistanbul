@@ -13,7 +13,7 @@ use PDO;
 final class MagasinsRepository
 {
     private PDO $db;
-    private const TABLE = 'magasins'; // ← aligné avec le schéma
+    private const TABLE = 'magasin'; // aligné avec la BDD (table au singulier)
 
     private function db(): PDO {
         return (new Bdd())->getBdd();
@@ -68,7 +68,7 @@ final class MagasinsRepository
 
     // --- Liste complète des magasins (objets) ---
     public function getAllMagasins(): array {
-        $st = $this->db()->prepare('SELECT * FROM magasin  ORDER BY id_magasin');
+        $st = $this->db()->prepare('SELECT * FROM '.self::TABLE.'  ORDER BY id_magasin');
         $st->execute();
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
         return array_map(fn($r) => new Magasin($r), $rows);

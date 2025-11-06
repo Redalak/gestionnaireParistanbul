@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../src/auth/Auth.php';
 \auth\Auth::startSession();
 \auth\Auth::requireAnyRole(['admin','gestionnaire','magasinier']);
+$_user = \auth\Auth::currentUser() ?? [];
+$role = isset($_user['role']) ? (string)$_user['role'] : '';
 require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/model/Commande.php';
 require_once __DIR__ . '/../src/repository/CommandeRepository.php';
@@ -112,6 +114,7 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                 </a>
             </li>
 
+            <?php if ($role !== 'magasinier'): ?>
             <!-- Produits -->
             <li class="nav-item dropdown-container">
                 <a href="#" class="nav-link dropdown-toggle">
@@ -170,6 +173,7 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                     <span class="nav-label">Utilisateurs</span>
                 </a>
             </li>
+            <?php endif; ?>
         </ul>
 
         <ul class="nav-list secondary-nav">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 05, 2025 at 03:37 PM
+-- Generation Time: Nov 06, 2025 at 10:20 AM
 -- Server version: 8.0.40
 -- PHP Version: 8.3.14
 
@@ -164,9 +164,12 @@ CREATE TABLE `magasin` (
 --
 
 INSERT INTO `magasin` (`id_magasin`, `nom`, `ville`, `adresse`, `telephone`, `email`, `type`) VALUES
-(1, 'Centrale Paristanbul', 'Paris', NULL, NULL, NULL, 'centrale'),
-(2, 'Paristanbul Villemomble', 'Lyon', NULL, NULL, NULL, 'magasin'),
-(3, 'Paristanbul Bondy', 'Lille', NULL, NULL, NULL, 'magasin');
+(1, 'Centrale Paristanbul', 'Villiers-le-bel', NULL, NULL, NULL, 'centrale'),
+(2, 'Paristanbul Villemomble', 'Villemomble', NULL, NULL, NULL, 'magasin'),
+(3, 'Paristanbul Bondy', 'Bondy', NULL, NULL, NULL, 'magasin'),
+(4, 'Paristanbul Drancy', 'Drancy', NULL, NULL, NULL, 'magasin'),
+(5, 'Paristanbul Vers-Saint-Denis', 'Vers-Saint-Denis', NULL, NULL, NULL, 'magasin'),
+(6, 'Paristanbul Nogent-sur-Oise', 'Nogent-sur-Oise', NULL, NULL, NULL, 'magasin');
 
 -- --------------------------------------------------------
 
@@ -245,7 +248,8 @@ CREATE TABLE `utilisateur` (
 INSERT INTO `utilisateur` (`id_user`, `nom`, `prenom`, `email`, `mdp`, `role`, `ref_magasin`) VALUES
 (1, 'Admin', 'Centrale', 'admin@paristanbul.com', 'admin123', 'admin', 1),
 (2, 'Julie', 'Martin', 'julie@lyon.com', 'test123', 'magasinier', 2),
-(3, 'Karim', 'Ben', 'karim@lille.com', 'test123', 'magasinier', 3);
+(3, 'Karim', 'Ben', 'karim@lille.com', 'test123', 'magasinier', 3),
+(4, 'lakhledj', 'reda', 'reda&@gmail.com', '$2y$10$Yxc/3Nc/8lBMlWjO63dDz.uQGyPYuO0MHVjv3/kXPaNiTzcpbEAn6', 'magasinier', NULL);
 
 --
 -- Indexes for dumped tables
@@ -354,7 +358,7 @@ ALTER TABLE `fournisseur`
 -- AUTO_INCREMENT for table `magasin`
 --
 ALTER TABLE `magasin`
-  MODIFY `id_magasin` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_magasin` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `mouvement`
@@ -372,7 +376,7 @@ ALTER TABLE `produit`
 -- AUTO_INCREMENT for table `utilisateur`
 --
 ALTER TABLE `utilisateur`
-  MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
