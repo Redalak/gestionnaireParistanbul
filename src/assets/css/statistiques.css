@@ -1,0 +1,40 @@
+/* Main content avec sidebar */
+.main-content {
+    padding: 20px;
+    max-width: 1200px;
+    margin-left: 250px; /* largeur sidebar */
+    transition: margin-left 0.3s ease;
+}
+/* Quand sidebar est réduite */
+.sidebar.collapsed + .main-content {
+    margin-left: 70px;
+}
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background: #151A2D;
+    color: #fff;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+}
+.sidebar.collapsed {
+    width: 70px;
+}
+.sidebar .nav-label {
+    white-space: nowrap;
+}
+.sidebar .dropdown-menu {
+    padding-left: 20px;
+}
+/* Styles de mise en page */
+.stats-cards { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:40px; }
+.stats-card { background:#EEF2FF; flex:1; padding:20px; border-radius:10px; text-align:center; min-width:150px; }
+.chart-container { margin:40px 0; }
+.chart-container canvas { max-width:100%; }
+.grid-two { display:flex; flex-wrap:wrap; gap:40px; justify-content:space-between; }
+.grid-item { flex:1; min-width:300px; }
+h2 { margin-bottom:15px; }
