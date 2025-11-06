@@ -1,6 +1,7 @@
 <?php
-/* statistiques.php */
 require_once __DIR__ . '/../src/bdd/Bdd.php';
+require_once __DIR__ . '/../src/repository/CommandeRepository.php';
+require_once __DIR__ . '/../src/repository/ProduitRepository.php';
 
 use bdd\Bdd;
 use repository\CommandeRepository;
@@ -8,41 +9,65 @@ use repository\ProduitRepository;
 
 $pdo = (new Bdd())->getBdd();
 
-require_once __DIR__ . '/../src/bdd/Bdd.php';
-require_once __DIR__ . '/../src/repository/CommandeRepository.php';
-require_once __DIR__ . '/../src/repository/ProduitRepository.php';
-
-
-$pdo = (new Bdd())->getBdd();
-
 $commandeRepo = new CommandeRepository();
 $produitRepo = new ProduitRepository();
 
-// --- Commandes ---
+// ========================== COMMANDES ==========================
+
+// Commandes par magasin
 $commandeParMagasin = $commandeRepo->getCommandesParMagasin();
-$commandeParMagasinJson = json_encode($commandeParMagasin);
+$commandeParMagasinJson = json_encode(array_map(fn($c) => [
+        'magasin' => $c['nom_magasin'] ?? $c['magasin'] ?? 'Inconnu',
+        'nb_commandes' => (int)($c['nb_commandes'] ?? 0)
+], $commandeParMagasin));
 
-$totalCommandes = $commandeRepo->getTotalCommandes();
-$etatCommandes = $commandeRepo->getEtatCommandes();
-$etatCommandesJson = json_encode($etatCommandes);
-
+// Commandes du mois (dernier 30 jours)
 $commandesMois = $commandeRepo->getCommandesDerniers30Jours();
-$commandesMoisJson = json_encode($commandesMois);
+$commandesMoisJson = json_encode(array_map(fn($c) => [
+        'date' => $c['date'] ?? $c['jour'] ?? 'Inconnu',
+        'nb_commandes' => (int)($c['nb_commandes'] ?? 0)
+], $commandesMois));
 
+// Commandes par client Top 10
 $commandeParClient = $commandeRepo->getCommandesParClientTop10();
-$commandeParClientJson = json_encode($commandeParClient);
+$commandeParClientJson = json_encode(array_map(fn($c) => [
+        'client' => $c['nom_client'] ?? $c['client'] ?? 'Inconnu',
+        'nb_commandes' => (int)($c['nb_commandes'] ?? 0)
+], $commandeParClient));
 
-// --- Produits ---
+// État des commandes
+$etatCommandes = $commandeRepo->getEtatCommandes();
+$etatCommandesJson = json_encode(array_map(fn($e) => [
+        'etat' => $e['etat'] ?? 'Inconnu',
+        'nb_commandes' => (int)($e['nb_commandes'] ?? 0)
+], $etatCommandes));
+
+// Total commandes
+$totalCommandes = $commandeRepo->getTotalCommandes();
+
+// ========================== PRODUITS ==========================
+
+// Total produits
 $totalProduits = $produitRepo->getTotalProduits();
-$produitsParCategorie = $produitRepo->getProduitsParCategorieStats();
-$produitsParCategorieJson = json_encode($produitsParCategorie);
 
-$topProduits = $produitRepo->getTopProduitsVendus();
-$topProduitsJson = json_encode($topProduits);
-
+// Valeur totale commandes
 $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
-?>
 
+// Top produits vendus
+$topProduits = $produitRepo->getTopProduitsVendus();
+$topProduitsJson = json_encode(array_map(fn($p) => [
+        'produit' => $p['produit'] ?? $p['libelle'] ?? 'Inconnu',
+        'quantite' => (int)($p['quantite'] ?? $p['total_vendu'] ?? 0)
+], $topProduits));
+
+// Produits par catégorie
+$produitsParCategorie = $produitRepo->getProduitsParCategorieStats();
+$produitsParCategorieJson = json_encode(array_map(fn($p) => [
+        'nom_categorie' => $p['nom_categorie'] ?? $p['categorie'] ?? 'Inconnu',
+        'quantite_totale' => (int)($p['quantite_totale'] ?? 0)
+], $produitsParCategorie));
+
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -51,19 +76,11 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../src/assets/css/index.css" />
     <link rel="stylesheet" href="../src/assets/css/statistiques.css" />
-
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
 
-    </style>
 </head>
 <body>
-
-<!-- Bouton menu mobile -->
-<button class="sidebar-menu-button">
-    <span class="material-symbols-rounded">menu</span>
-</button>
 
 <!-- BARRE LATÉRALE -->
 <aside class="sidebar">
@@ -78,12 +95,16 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
 
     <nav class="sidebar-nav">
         <ul class="nav-list primary-nav">
+
+            <!-- Tableau de bord -->
             <li class="nav-item">
                 <a href="index.php" class="nav-link">
                     <span class="material-symbols-rounded">dashboard</span>
                     <span class="nav-label">Dashboard</span>
                 </a>
             </li>
+
+            <!-- Produits -->
             <li class="nav-item dropdown-container">
                 <a href="#" class="nav-link dropdown-toggle">
                     <span class="material-symbols-rounded">inventory_2</span>
@@ -96,6 +117,8 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
                     <li><a href="../vue/crudProduits/categories.php" class="nav-link dropdown-link">Catégories</a></li>
                 </ul>
             </li>
+
+            <!-- Commandes -->
             <li class="nav-item dropdown-container">
                 <a href="#" class="nav-link dropdown-toggle">
                     <span class="material-symbols-rounded">shopping_cart</span>
@@ -107,31 +130,40 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
                     <li><a href="crudCommandes/createCommande.php" class="nav-link dropdown-link">Nouvelle commande</a></li>
                 </ul>
             </li>
+
+            <!-- Mouvements -->
             <li class="nav-item">
-                <a href="mouvements.php" class="nav-link">
+                <a href="../vue/mouvements.php" class="nav-link">
                     <span class="material-symbols-rounded">compare_arrows</span>
                     <span class="nav-label">Mouvements</span>
                 </a>
             </li>
+
+            <!-- Statistiques -->
             <li class="nav-item">
-                <a href="statistiques.php" class="nav-link">
+                <a href="../vue/statistiques.php" class="nav-link">
                     <span class="material-symbols-rounded">query_stats</span>
                     <span class="nav-label">Statistiques</span>
                 </a>
             </li>
+
+            <!-- Factures -->
             <li class="nav-item">
-                <a href="crudFactures/factures.php" class="nav-link">
+                <a href="../vue/crudFactures/factures.php" class="nav-link">
                     <span class="material-symbols-rounded">receipt_long</span>
                     <span class="nav-label">Factures</span>
                 </a>
             </li>
+
+            <!-- Utilisateurs -->
             <li class="nav-item">
-                <a href="crudProfils/profil.php" class="nav-link">
+                <a href="../vue/crudProfils/profil.php" class="nav-link">
                     <span class="material-symbols-rounded">group</span>
                     <span class="nav-label">Utilisateurs</span>
                 </a>
             </li>
         </ul>
+
         <ul class="nav-list secondary-nav">
             <li class="nav-item">
                 <a href="#" class="nav-link">
@@ -146,25 +178,24 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
                 </a>
             </li>
         </ul>
-    </nav>
 </aside>
 
-<main class="main-content">
 
+<main class="main-content">
     <h1>Dashboard Statistiques</h1>
 
     <div class="stats-cards">
         <div class="stats-card">
             <h3>Total des commandes</h3>
-            <p><?= $totalCommandes ?></p>
+            <p id="totalCommandes"><?= $totalCommandes ?></p>
         </div>
         <div class="stats-card">
             <h3>Total des produits</h3>
-            <p><?= $totalProduits ?></p>
+            <p id="totalProduits"><?= $totalProduits ?></p>
         </div>
         <div class="stats-card">
             <h3>Valeur totale commandes</h3>
-            <p><?= number_format($valeurTotaleCommandes, 2, ',', ' ') ?> €</p>
+            <p id="valeurTotale"><?= number_format($valeurTotaleCommandes, 2, ',', ' ') ?> €</p>
         </div>
     </div>
 
@@ -199,13 +230,10 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
             <canvas id="categorieChart"></canvas>
         </div>
     </div>
-
 </main>
-</body>
-</html>
-<script type="text/javascript" src="../src/assets/js/index.js"> </script>
+
 <script>
-    const statsData = {
+    window.statsData = {
         commandeParMagasin: <?= $commandeParMagasinJson ?>,
         commandesMois: <?= $commandesMoisJson ?>,
         commandeParClient: <?= $commandeParClientJson ?>,
@@ -213,9 +241,10 @@ $valeurTotaleCommandes = $produitRepo->getValeurTotaleCommandes();
         etatCommandes: <?= $etatCommandesJson ?>,
         produitsParCategorie: <?= $produitsParCategorieJson ?>
     };
+</script>
 
-</script>
-<script src="../src/assets/js/Chart.js"></script>
-<script>
-    renderCharts(statsData);
-</script>
+<script src="../src/assets/js/chart.js"></script>
+<script src="../src/assets/js/stats.js"></script>
+<script type="text/javascript" src="../src/assets/js/index.js"> </script>
+</body>
+</html>
