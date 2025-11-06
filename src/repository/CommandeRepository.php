@@ -1,18 +1,24 @@
 <?php
 
 namespace repository;
+
 require_once __DIR__ . '/../../src/bdd/Bdd.php';
 use model\Commande;
 use PDO;
 use bdd\Bdd;
+
 class CommandeRepository
 {
     private PDO $db;
 
-    public function __construct(?PDO $pdo = null)
+    public function __construct()
     {
-        $this->db = $pdo ?? (new Bdd())->getBdd();
+        $this->db = (new Bdd())->getBdd();
     }
+
+    /* ===========================================================
+       ===================== MÉTHODES BASIQUES =====================
+       =========================================================== */
 
     // Ajouter une commande
     public function ajoutCommande(Commande $commande): bool
@@ -33,7 +39,7 @@ class CommandeRepository
 
         // Insertion
         $sql = "INSERT INTO commande (ref_magasin, ref_utilisateur, date_commande, etat, commentaire)
-            VALUES (:ref_magasin, :ref_utilisateur, :date_commande, :etat, :commentaire)";
+                VALUES (:ref_magasin, :ref_utilisateur, :date_commande, :etat, :commentaire)";
         $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
@@ -45,13 +51,10 @@ class CommandeRepository
         ]);
     }
 
-
     // Modifier une commande
     public function updateCommande(Commande $commande): bool
     {
-        // Liste des champs autorisés à être mis à jour
         $allowed = ['ref_magasin', 'ref_utilisateur', 'date_commande', 'etat', 'commentaire'];
-
         $set = [];
         $params = ['id_commande' => $commande->getIdCommande()];
 
@@ -66,10 +69,7 @@ class CommandeRepository
             }
         }
 
-        // Si aucun champ à mettre à jour, on retourne false
-        if (empty($set)) {
-            return false;
-        }
+        if (empty($set)) return false;
 
         $sql = 'UPDATE commande SET ' . implode(', ', $set) . ' WHERE id_commande = :id_commande';
         $stmt = $this->db->prepare($sql);
@@ -94,58 +94,16 @@ class CommandeRepository
         return $row ? new Commande($row) : null;
     }
 
-    /**
-     * Récupère les 10 dernières commandes dont l'état est 'en attente', 'préparée' ou 'expédiée'
-     *
-     * @return array Tableau d'objets Commande
-     */
-    /**
-     * Compte le nombre de commandes en cours (en attente, préparée ou expédiée)
-     *
-     * @return int Nombre de commandes en cours
-     */
-    public function countCommandesEnCours(): int {
-        $sql = 'SELECT COUNT(*) as total 
-                FROM commande 
-                WHERE etat IN ("en attente", "préparée", "expédiée")';
-                
-        $stmt = $this->db->query($sql);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        return (int) ($result['total'] ?? 0);
-    }
-
-    /**
-     * Récupère les 10 dernières commandes dont l'état est 'en attente', 'préparée' ou 'expédiée'
-     *
-     * @return array Tableau de tableaux associatifs représentant les commandes
-     */
-    public function getDernieresCommandesParEtat(): array {
+    // Récupérer toutes les commandes
+    public function getAllCommandes(): array
+    {
         $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
-            FROM commande c
-            LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
-            LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
-            WHERE c.etat IN ("en attente", "préparée", "expédiée")
-            ORDER BY c.date_commande DESC
-            LIMIT 10';
-            
+                FROM commande c
+                LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
+                LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
+                ORDER BY c.date_commande DESC';
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Récupérer toutes les commandes
-    public function getAllCommandes(): array {
-        $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
-            FROM commande c
-            LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
-            LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
-            ORDER BY c.date_commande DESC';
-        $stmt = $this->db->query($sql);
-        $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $results[] = $row;
-        }
-        return $results;
     }
 
     // Récupérer commandes par utilisateur
@@ -161,36 +119,92 @@ class CommandeRepository
         return $results;
     }
 
-    // Récupérer commandes par magasin
-    public function getCommandesByMagasin(int $idMagasin): array
+    /* ===========================================================
+       ===================== MÉTHODES STATISTIQUES =====================
+       =========================================================== */
+
+    // Commandes par magasin
+    public function getCommandesParMagasin(): array
     {
-        $sql = 'SELECT * FROM commande WHERE ref_magasin = :idMagasin';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['idMagasin' => $idMagasin]);
-        $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $results[] = new Commande($row);
-        }
-        return $results;
+        $query = "
+            SELECT m.nom, COUNT(c.id_commande) AS nb_commandes
+            FROM commande c
+            INNER JOIN magasin m ON c.ref_magasin = m.id_magasin
+            GROUP BY m.nom
+        ";
+        $stmt = $this->db->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Compter toutes les commandes
-    public function countCommandes(): int
+    // Total des commandes
+    public function getTotalCommandes(): int
     {
-        $sql = 'SELECT COUNT(*) FROM commande';
-        return (int) $this->db->query($sql)->fetchColumn();
+        return (int)$this->db->query("SELECT COUNT(*) FROM commande")->fetchColumn();
     }
 
-    // Rechercher commandes par intervalle de dates
-    public function findCommandesByDate(string $startDate, string $endDate): array
+    // État des commandes
+    public function getEtatCommandes(): array
     {
-        $sql = 'SELECT * FROM commande WHERE date_commande BETWEEN :start AND :end';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['start' => $startDate, 'end' => $endDate]);
-        $results = [];
+        $query = "SELECT etat, COUNT(*) AS nb_commandes FROM commande GROUP BY etat";
+        $stmt = $this->db->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Commandes des 30 derniers jours
+    public function getCommandesDerniers30Jours(): array
+    {
+        $query = "
+            SELECT DATE(c.date_commande) AS jour, COUNT(*) AS nb_commandes
+            FROM commande c
+            WHERE c.date_commande >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY DATE(c.date_commande)
+            ORDER BY DATE(c.date_commande)
+        ";
+        $stmt = $this->db->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Top 10 clients par nombre de commandes
+    public function getCommandesParClientTop10(): array
+    {
+        $query = "
+            SELECT u.nom, u.prenom, COUNT(c.id_commande) AS nb_commandes
+            FROM commande c
+            JOIN utilisateur u ON c.ref_utilisateur = u.id_user
+            GROUP BY u.id_user
+            ORDER BY nb_commandes DESC
+            LIMIT 10
+        ";
+        $stmt = $this->db->query($query);
+        $data = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $results[] = new Commande($row);
+            $data[] = ['client' => $row['prenom'] . ' ' . $row['nom'], 'nb_commandes' => (int)$row['nb_commandes']];
         }
-        return $results;
+        return $data;
+    }
+
+    // Compter commandes en cours
+    public function countCommandesEnCours(): int
+    {
+        $sql = 'SELECT COUNT(*) as total 
+                FROM commande 
+                WHERE etat IN ("en attente", "préparée", "expédiée")';
+        $stmt = $this->db->query($sql);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int) ($result['total'] ?? 0);
+    }
+
+    // Dernières commandes par état
+    public function getDernieresCommandesParEtat(): array
+    {
+        $sql = 'SELECT c.*, m.nom AS nom_magasin, u.nom AS nom_utilisateur, u.prenom AS prenom_utilisateur  
+                FROM commande c
+                LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
+                LEFT JOIN utilisateur u ON c.ref_utilisateur = u.id_user
+                WHERE c.etat IN ("en attente", "préparée", "expédiée")
+                ORDER BY c.date_commande DESC
+                LIMIT 10';
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
