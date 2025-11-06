@@ -1,5 +1,8 @@
 <?php
 /* index.php — tableau de bord principal */
+require_once __DIR__ . '/../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire','magasinier']);
 require_once __DIR__ . '/../src/bdd/Bdd.php';
 require_once __DIR__ . '/../src/model/Commande.php';
 require_once __DIR__ . '/../src/repository/CommandeRepository.php';
@@ -311,30 +314,17 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                 <?php else: ?>
                     <p>Aucune commande récente.</p>
                 <?php endif; ?>
+                
+                <div class="section-footer">
+                    <a href="crudCommandes/listeCommandes.php" class="btn-see-more">
+                        <span class="material-symbols-rounded">arrow_forward</span>
+                        Voir toutes les commandes
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div style="padding:40px">
-            <h2>Derniers produits ajoutés</h2>
-            <p>Liste des 10 à 12 derniers produits + bouton “Voir tout le stock”.</p>
-        </div>
 
-        <div style="padding:40px">
-            <h2>Statistiques simples</h2>
-            <ul>
-                <li>Graphique “Stock par catégorie”</li>
-                <li>Graphique “Produits les plus vendus”</li>
-                <li>Chiffre d’affaires mensuel / par magasin</li>
-            </ul>
-        </div>
-
-        <div style="padding:40px">
-            <h2>Alertes</h2>
-            <ul>
-                <li>Produits sous le seuil</li>
-                <li>Commandes non livrées depuis longtemps</li>
-            </ul>
-        </div>
 
         <!-- Section Factures impayées -->
         <div class="dashboard-section">
@@ -377,6 +367,13 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                 <?php else: ?>
                     <p>Aucune facture impayée.</p>
                 <?php endif; ?>
+                
+                <div class="section-footer">
+                    <a href="crudFactures/factures.php?etat=impayee" class="btn-see-more">
+                        <span class="material-symbols-rounded">arrow_forward</span>
+                        Voir toutes les factures impayées
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -425,8 +422,20 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <a href="crudProduits/listeProduits.php" class="btn-see-more" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background-color: #4e73df; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background-color 0.2s;">
+                            <span class="material-symbols-rounded" style="font-size: 18px;">arrow_forward</span>
+                            Voir tous les produits
+                        </a>
+                    </div>
                 <?php else: ?>
                     <p>Aucun produit trouvé.</p>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <a href="crudProduits/listeProduits.php" class="btn-see-more" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background-color: #4e73df; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background-color 0.2s;">
+                            <span class="material-symbols-rounded" style="font-size: 18px;">arrow_forward</span>
+                            Voir les produits
+                        </a>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -514,16 +523,64 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                                     <?= $ecart > 0 ? '-'.$ecart : '0' ?>
                                 </td>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    
+                    <div class="section-footer">
+                        <a href="crudProduits/listeProduits.php?alerte=1" class="btn-see-more alert">
+                            <span class="material-symbols-rounded">warning</span>
+                            Voir tous les produits en alerte
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <?php endif; ?>
-    </section>
-</main>
+            <?php endif; ?>
+        </section>
+    </main>
 
 <style>
+    .btn-see-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background-color: #4e73df;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    
+    .btn-see-more:hover {
+        background-color: #3a5bc7;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .btn-see-more .material-symbols-rounded {
+        font-size: 18px;
+    }
+    
+    .btn-see-more.alert {
+        background-color: #e74a3b;
+    }
+    
+    .btn-see-more.alert:hover {
+        background-color: #d23a2b;
+    }
+    
+    .section-footer {
+        margin-top: 20px;
+        text-align: right;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    
     .produits-list {
         margin-top: 15px;
     }

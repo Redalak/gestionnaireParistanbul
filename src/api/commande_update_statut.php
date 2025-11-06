@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
+require_once __DIR__ . '/../auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
+
 require_once __DIR__ . '/../repository/CommandeRepository.php';
 require_once __DIR__ . '/../model/Commande.php';
 require_once __DIR__ . '/../bdd/Bdd.php';

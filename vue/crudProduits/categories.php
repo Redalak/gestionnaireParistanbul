@@ -1,4 +1,8 @@
-<?php /* categories.php */ ?>
+<?php /* categories.php */
+require_once __DIR__ . '/../../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>

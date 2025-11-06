@@ -1,5 +1,8 @@
 <?php
 /* listeCommandes.php */
+require_once __DIR__ . '/../../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
 require_once __DIR__ . '/../../src/repository/CommandeRepository.php';
 require_once __DIR__ . '/../../src/model/Commande.php';
 require_once __DIR__ . '/../../src/repository/MagasinsRepository.php';

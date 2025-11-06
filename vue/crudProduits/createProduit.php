@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
+
 require_once __DIR__ . '/../../src/repository/ProduitRepository.php';
 require_once __DIR__ . '/../../src/repository/CategoriesRepository.php';
 
