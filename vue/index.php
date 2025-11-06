@@ -183,7 +183,6 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                 </a>
             </li>
         </ul>
-    </nav>
 </aside>
 
 <!-- CONTENU PRINCIPAL -->
@@ -191,6 +190,7 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
     <section class="dashboard">
         <h1>Tableau de bord</h1>
         <hr>
+        <?php include 'partials/mouvements_recents.php'; ?>
         <div style="padding:40px">
             <h2>Résumé du stock</h2>
             <ul class="summary-list">
