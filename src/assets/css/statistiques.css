@@ -1,0 +1,179 @@
+/* =============================
+   STYLES GÉNÉRAUX DASHBOARD
+   ============================= */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f7f8fa;
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    padding: 2rem;
+    margin-left: 260px; /* pour sidebar */
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* =============================
+   CARTES KPI PRINCIPALES
+   ============================= */
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.stats-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    padding: 1.8rem 1.5rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.25s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stats-card span.material-symbols-rounded {
+    font-size: 40px;
+    color: #ff6b35;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stats-card h3 {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+.stats-card p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    margin: 0;
+}
+
+/* =============================
+   CONTAINERS DE GRAPHIQUES
+   ============================= */
+
+.chart-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 1.5rem 1.8rem;
+    width: 100%;
+}
+
+.chart-container h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.chart-container canvas {
+    width: 100%;
+    height: 340px !important;
+}
+
+/* =============================
+   GRID DE 2 GRAPHIQUES
+   ============================= */
+
+.grid-two {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2rem;
+}
+
+.grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+/* =============================
+   TEXTE SECONDAIRE
+   ============================= */
+
+.update-info {
+    font-size: 0.9rem;
+    color: #999;
+    text-align: right;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+/* =============================
+   RESPONSIVE
+   ============================= */
+
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-two {
+        grid-template-columns: 1fr;
+    }
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    .stats-card {
+        padding: 1.2rem;
+    }
+    .stats-card p {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    .chart-container h2 {
+        font-size: 1rem;
+    }
+}
+
+/* =============================
+   LIENS ACTIFS NAVIGATION
+   ============================= */
+
+.nav-link.active {
+    background: #ff6b35;
+    color: #fff !important;
+    border-radius: 8px;
+}
+
+.nav-link.active .material-symbols-rounded {
+    color: #fff;
+}
