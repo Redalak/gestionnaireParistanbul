@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../src/auth/Auth.php';
+\auth\Auth::startSession();
+\auth\Auth::requireAnyRole(['admin','gestionnaire']);
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 require_once __DIR__ . '/../../src/repository/ProduitRepository.php';
