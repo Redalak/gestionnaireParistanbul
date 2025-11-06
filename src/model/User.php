@@ -12,6 +12,7 @@ class User
     private $role ;
     private $genre ;
     private $poste ;
+    private $ref_magasin ;
 
     public function __construct(array $donnees)
     {
@@ -156,6 +157,17 @@ class User
     public function setPoste($poste): void
     {
         $this->poste = $poste;
+    }
+
+    // ref_magasin support (schema actuel)
+    public function getRefMagasin()
+    {
+        return $this->ref_magasin;
+    }
+
+    public function setRef_magasin($ref_magasin): void
+    {
+        $this->ref_magasin = $ref_magasin !== '' ? $ref_magasin : null;
     }
 
 

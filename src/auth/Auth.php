@@ -43,9 +43,8 @@ class Auth
 
         if (!$ok) return false;
 
-        // Block login if not approved
-        $role = (string)$user->getRole();
-        if ($role === 'pending') {
+        // Block login if account not yet approved (ref_magasin is NULL)
+        if ($user->getRefMagasin() === null) {
             return false;
         }
 
@@ -58,6 +57,7 @@ class Auth
             'id_user' => (int)$user->getIdUser(),
             'email' => (string)$user->getEmail(),
             'role' => (string)$user->getRole(),
+            'ref_magasin' => $user->getRefMagasin(),
             'nom' => (string)$user->getNom(),
             'prenom' => (string)$user->getPrenom(),
         ];

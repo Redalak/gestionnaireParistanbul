@@ -34,6 +34,17 @@ class UserRepository
     }
 
     /**
+     * Retourne uniquement les utilisateurs en attente (role = 'pending')
+     */
+    public function getPendingUsers(): array
+    {
+        // Pending = comptes sans affectation magasin (ref_magasin IS NULL)
+        $sql = "SELECT * FROM utilisateur WHERE ref_magasin IS NULL ORDER BY id_user DESC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Trouve un utilisateur par son ID
      */
     public function getUserById(int $idUser): ?User
@@ -50,17 +61,17 @@ class UserRepository
      */
     public function inscription(User $user): bool
     {
-        $sql = 'INSERT INTO utilisateur (nom, prenom, email, mdp, role, genre, poste)
-                VALUES (:nom, :prenom, :email, :mdp, :role, :genre, :poste)';
+        // Insert compatible with current schema: no genre/poste; ref_magasin nullable
+        $sql = 'INSERT INTO utilisateur (nom, prenom, email, mdp, role, ref_magasin)
+                VALUES (:nom, :prenom, :email, :mdp, :role, :ref_magasin)';
         $st  = $this->db->prepare($sql);
         return $st->execute([
-            'nom'    => $user->getNom(),
-            'prenom' => $user->getPrenom(),
-            'email'  => $user->getEmail(),
-            'mdp'    => $user->getMdp(),
-            'role'   => $user->getRole(),
-            'genre'  => $user->getGenre(),
-            'poste'  => $user->getPoste(),
+            'nom'          => $user->getNom(),
+            'prenom'       => $user->getPrenom(),
+            'email'        => $user->getEmail(),
+            'mdp'          => $user->getMdp(),
+            'role'         => $user->getRole(),
+            'ref_magasin'  => $user->getRefMagasin(), // null for pending
         ]);
     }
 
@@ -81,7 +92,7 @@ class UserRepository
      */
     public function update(int $id_user, array $data): bool
     {
-        $allowed = ['nom','prenom','email','mdp','role','genre','poste'];
+        $allowed = ['nom','prenom','email','mdp','role','ref_magasin'];
         $set = [];
         $params = ['id_user' => $id_user];
 

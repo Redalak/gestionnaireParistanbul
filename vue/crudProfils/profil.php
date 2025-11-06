@@ -6,8 +6,7 @@ require_once __DIR__ . '/../../src/repository/UserRepository.php';
 \auth\Auth::requireAnyRole(['admin']);
 use repository\UserRepository;
 $repoUser = new UserRepository();
-$all = $repoUser->getAllUsers();
-$pending = array_values(array_filter($all, function($u){ return ($u['role'] ?? '') === 'pending'; }));
+$pending = $repoUser->getPendingUsers();
 ?>
 <!DOCTYPE html>
 <html lang="fr">

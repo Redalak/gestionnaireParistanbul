@@ -22,10 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: ' . $target);
             exit;
         }
-        // Pending detection: same credentials but role pending
+        // Pending detection: same credentials but ref_magasin is NULL
         $repo = new UserRepository();
         $u = $repo->getUserByEmail($email);
-        if ($u && password_verify($password, (string)$u->getMdp()) && (string)$u->getRole() === 'pending') {
+        if ($u && password_verify($password, (string)$u->getMdp()) && $u->getRefMagasin() === null) {
             $error = "Votre compte est en attente d'approbation par un administrateur.";
         } else {
             $error = 'Identifiants invalides';

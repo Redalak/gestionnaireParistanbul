@@ -24,6 +24,7 @@ try {
 
     $id = (int)($input['id_user'] ?? 0);
     $action = (string)($input['action'] ?? ''); // 'approve' or 'reject'
+    $refMagasin = isset($input['ref_magasin']) ? (int)$input['ref_magasin'] : 0; // default 0
 
     if ($id <= 0 || !in_array($action, ['approve','reject'], true)) {
         http_response_code(400);
@@ -45,18 +46,12 @@ try {
         exit;
     }
 
-    // approve: set role to requested role stored in poste (fallback magasinier), clear poste
-    $requested = (string)($user->getPoste() ?? '');
-    if (!in_array($requested, ['magasinier','gestionnaire','admin'], true)) {
-        $requested = 'magasinier';
-    }
-
+    // approve: set ref_magasin to mark as approved (role already set at signup)
     $ok = $repo->update($id, [
-        'role' => $requested,
-        'poste' => null,
+        'ref_magasin' => $refMagasin,
     ]);
 
-    echo json_encode(['ok' => (bool)$ok, 'role' => $requested]);
+    echo json_encode(['ok' => (bool)$ok, 'ref_magasin' => $refMagasin, 'role' => (string)$user->getRole()]);
 } catch (Throwable $e) {
     http_response_code(500);
     echo json_encode(['ok' => false, 'error' => $e->getMessage()]);

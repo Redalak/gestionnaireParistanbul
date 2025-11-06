@@ -13,7 +13,6 @@ try {
     $prenom = trim((string)($_GET['prenom'] ?? ''));
     $email = trim((string)($_GET['email'] ?? ''));
     $password = (string)($_GET['password'] ?? '');
-    $genre = trim((string)($_GET['genre'] ?? ''));
     $requestedRole = (string)($_GET['requestedRole'] ?? 'magasinier');
 
     if ($nom === '' || $prenom === '' || $email === '' || $password === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -39,9 +38,8 @@ try {
         'prenom' => $prenom,
         'email' => $email,
         'mdp' => $hash,
-        'role' => 'pending',       // not approved yet
-        'genre' => $genre,
-        'poste' => $requestedRole, // store requested role here until approval
+        'role' => $requestedRole,   // requested role saved directly
+        'ref_magasin' => null,      // NULL means pending approval
     ]);
 
     $ok = $repo->inscription($user);
