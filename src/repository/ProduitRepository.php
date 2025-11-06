@@ -252,6 +252,7 @@ final class ProduitRepository
                 ORDER BY c.nom';
 
         $stmt = $this->db->prepare($sql);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
