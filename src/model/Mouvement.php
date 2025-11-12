@@ -12,6 +12,7 @@ class Mouvement
     private $source;
     private $dateMouvement;
     private $commentaire;
+    private $extraData = [];
 
     public function __construct(array $donnees)
     {
@@ -118,7 +119,7 @@ class Mouvement
      */
     public function setData(string $key, $value): void
     {
-        $this->$key = $value;
+        $this->extraData[$key] = $value;
     }
     
     /**
@@ -128,6 +129,6 @@ class Mouvement
      */
     public function getData(string $key)
     {
-        return $this->$key ?? null;
+        return $this->extraData[$key] ?? null;
     }
 }
