@@ -78,8 +78,8 @@ $produitsParCategorieJson = json_encode(array_map(fn($p) => [
         'nom_categorie' => $p['nom_categorie'] ?? $p['categorie'] ?? 'Inconnu',
         'quantite_totale' => (int)($p['quantite_totale'] ?? 0)
 ], $produitsParCategorie));
-
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -156,6 +156,13 @@ $produitsParCategorieJson = json_encode(array_map(fn($p) => [
                 <a href="../vue/statistiques.php" class="nav-link">
                     <span class="material-symbols-rounded">query_stats</span>
                     <span class="nav-label">Statistiques</span>
+                </a>
+            </li>
+            <!-- Logistique -->
+            <li class="nav-item">
+                <a href="agenda.php" class="nav-link">
+                    <span class="material-symbols-rounded">query_stats</span>
+                    <span class="nav-label">Agenda</span>
                 </a>
             </li>
 

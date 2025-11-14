@@ -1,4 +1,5 @@
 <?php
+/* listeProduits.php */
 require_once __DIR__ . '/../../src/auth/Auth.php';
 \auth\Auth::startSession();
 \auth\Auth::requireAnyRole(['admin','gestionnaire']);
@@ -224,7 +225,13 @@ foreach ($catPairs as $c) {
                     <span class="nav-label">Statistiques</span>
                 </a>
             </li>
-
+            <!-- Logistique -->
+            <li class="nav-item">
+                <a href="../agenda.php" class="nav-link">
+                    <span class="material-symbols-rounded">query_stats</span>
+                    <span class="nav-label">Agenda</span>
+                </a>
+            </li>
             <!-- Factures -->
             <li class="nav-item">
                 <a href="../../vue/crudFactures/factures.php" class="nav-link">

@@ -48,9 +48,26 @@ class FactureRepository
 
     public function getAllFactures() : array
     {
-        $sql = 'SELECT * FROM facture ORDER BY id_facture DESC';
-        $rows = $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-        return array_map(fn($r) => new Facture($r), $rows);
+        $sql = ' SELECT 
+        f.id_facture,
+        f.ref_commande,
+        f.montant,
+        f.date_emission,
+        f.paye,
+        c.id_commande,
+        c.etat,
+        m.nom AS magasin_nom
+    FROM facture f
+    LEFT JOIN commande c ON f.ref_commande = c.id_commande
+    LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
+    ORDER BY f.date_emission DESC';
+        try {
+            $stmt = $this->db->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log('Erreur SQL dans getAllFactures: ' . $e->getMessage());
+            return [];
+        }
     }
     public function getFactureById(int $idFacture): ?Facture
     {
@@ -90,4 +107,26 @@ class FactureRepository
             return [];
         }
     }
+    public function getDetailFacture($id)
+    {
+        $sql = "SELECT f.*, c.date_commande, c.etat AS etat_commande, 
+                   m.nom AS magasin_nom, m.ville
+            FROM facture f
+            LEFT JOIN commande c ON f.ref_commande = c.id_commande
+            LEFT JOIN magasin m ON c.ref_magasin = m.id_magasin
+            WHERE f.id_facture = ?";
+
+        $id = (int) $id;
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: []; 
+        } catch (\PDOException $e) {
+            error_log('Erreur SQL dans getDetailFacture: ' . $e->getMessage());
+            return [];
+        }
+    }
+
 }

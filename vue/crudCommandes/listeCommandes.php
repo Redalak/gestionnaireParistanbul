@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/model/Commande.php';
 require_once __DIR__ . '/../../src/repository/MagasinsRepository.php';
 require_once __DIR__ . '/../../src/model/Magasin.php';
 
+
 use repository\CommandeRepository;
 use model\Produit;
 
@@ -35,67 +36,19 @@ $commandes = $repoCommandes ->getAllCommandes() ;
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paristanbul • Tableau de bord</title>
 
     <link rel="stylesheet" href="../../src/assets/css/index.css" />
+    <link rel="stylesheet" href="../../src/assets/css/listeCommande.css" />
+
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <style>
-        body { background: #f3f4f6; color: #111827; }
-        .page-header { display:flex; align-items:center; justify-content:space-between; padding:16px 0; margin:0 0 8px 0; border-bottom:1px solid #e5e7eb; }
-        .page-header h1 { font-size:22px; margin:0; }
-        .toolbar { display:flex; gap:18px; align-items:center; flex-wrap:wrap; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:12px 14px; margin: 8px 0 14px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-        .toolbar select, .toolbar input { padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; background:#fff; color:#111827; }
-        .btn-ghost { border:1px solid #d1d5db; background:#fff; color: #111827; border-radius:8px; padding:8px 12px; }
-        .btn-primary { background:#2563eb; color:#fff; border:none; border-radius:8px; padding:10px 14px; }
-        .btn-primary:hover { background:#1d4ed8; }
-        .dataTables_wrapper .dataTables_filter input { border-radius:8px; background:#fff; color:#111827; border:1px solid #d1d5db; }
-        table.dataTable.display tbody tr:hover { background:#f8fafc; cursor:pointer; }
-        table.dataTable thead th { background:#f3f4f6; color: #111827; }
-        .dataTables_wrapper .dataTables_paginate .paginate_button { color: #111827 !important; }
-        .dataTables_wrapper .dataTables_length select { background:#fff; color:#111827; border:1px solid #d1d5db; }
-        .dataTables_wrapper .dataTables_info { color: #6b7280; }
-        .dataTables_wrapper .dt-buttons .dt-button { background: #fff; color: #111827; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; }
-        .dataTables_wrapper .dt-buttons .dt-button:hover { background: #f8fafc; }
-        .badge { display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid transparent; }
-        /* Actions: éviter chevauchement */
-        td.actions { white-space: nowrap; }
-        td.actions a.btn { display:inline-flex; align-items:center; justify-content:center; margin-right:6px; }
-        td.actions a.btn:last-child { margin-right:0; }
-        .etat-en_attente { background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
-        .etat-préparée { background:#ecfeff; color:#155e75; border-color:#a5f3fc; }
-        .etat-expédiée { background:#eef2ff; color:#3730a3; border-color:#c7d2fe; }
-        .etat-livrée { background:#ecfdf5; color:#065f46; border-color:#a7f3d0; }
-        .etat-annulée { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
-        .stats-bar { margin: 8px 0 14px 0; padding: 10px 12px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; color:#374151; }
-        /* Détails (+) */
-        #liste-commandes td.details-control{ width:34px; text-align:center; cursor:pointer; }
-        #liste-commandes td.details-control::before{ content:"➕"; font-size:14px; opacity:.7; }
-        #liste-commandes tr.shown td.details-control::before{ content:"➖"; }
-
-        /* Panneau enfant */
-        .cmd-child{ padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; }
-        .cmd-child .grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-        .cmd-child .actions{ display:flex; gap:8px; margin-top:10px; }
-        .cmd-child .btn-ghost{ border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; }
-
-        /* Chips statut (filtres rapides) */
-        .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 6px; }
-        .chip{ padding:6px 10px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; font-size:13px; }
-        .chip.active{ border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.10) inset; }
-        .chip .count{ opacity:.7; margin-left:6px; }
-
-        /* Progression de statut (4 étapes) */
-        .status-progress{ display:inline-grid; grid-auto-flow:column; gap:5px; align-items:center; margin-left:6px; }
-        .status-progress .dot{ width:7px; height:7px; border-radius:999px; background:#d1d5db; }
-        .status-progress .dot.on{ background:#60a5fa; }
-    </style>
 </head>
-
 <body>
-
 <!-- Bouton menu mobile -->
 <button class="sidebar-menu-button">
     <span class="material-symbols-rounded">menu</span>
@@ -104,7 +57,7 @@ $commandes = $repoCommandes ->getAllCommandes() ;
 <!-- BARRE LATÉRALE -->
 <aside class="sidebar">
     <header class="sidebar-header">
-        <a href="index.php" class="header-logo">
+        <a href="../index.php" class="header-logo">
             <img src="../../src/assets/img/logo.png" style="width:180px;" alt="Paristanbul" />
         </a>
         <button class="sidebar-toggler">
@@ -165,6 +118,13 @@ $commandes = $repoCommandes ->getAllCommandes() ;
                     <span class="nav-label">Statistiques</span>
                 </a>
             </li>
+            <!-- Logistique -->
+            <li class="nav-item">
+                <a href="../agenda.php" class="nav-link">
+                    <span class="material-symbols-rounded">query_stats</span>
+                    <span class="nav-label">Agenda</span>
+                </a>
+            </li>
 
             <!-- Factures -->
             <li class="nav-item">
@@ -205,7 +165,12 @@ $commandes = $repoCommandes ->getAllCommandes() ;
 <main class="main-content" style="padding-right:16px;">
     <div class="page-header">
         <h1>Liste des commandes</h1>
+        <div>
         <a href="createCommande.php" class="btn-primary">+ Nouvelle commande</a>
+        </div>
+        <div>
+        <a href="logistique_commandes.php" class="btn btn-secondary">Gestion des commandes</a>
+        </div>
     </div>
     <div class="toolbar">
         <div style="display:flex; gap:10px; align-items:center;">

@@ -4,12 +4,17 @@ namespace model;
 
 class Commande
 {
+
     private ?int $idCommande;
     private ?int $refMagasin;
     private ?int $refUtilisateur;
     private ?string $dateCommande;
     private ?string $etat;
     private ?string $commentaire;
+
+    // Champs ajoutés pour JOIN
+    private ?string $nom_magasin;
+    private ?string $ville;
 
     public function __construct(array $donnees = [])
     {
@@ -19,7 +24,9 @@ class Commande
     private function hydrate(array $donnees): void
     {
         foreach ($donnees as $key => $value) {
+            // transforme magasin_nom → setMagasinNom
             $method = 'set' . str_replace('_', '', ucfirst($key));
+
             if (method_exists($this, $method)) {
                 $this->$method($value);
             }
@@ -85,4 +92,27 @@ class Commande
     {
         $this->commentaire = $commentaire;
     }
+
+    // GETTERS / SETTERS POUR MAGASIN + VILLE
+
+    public function getNomMagasin(): ?string
+    {
+        return $this->nom_magasin;
+    }
+
+    public function setNomMagasin(?string $nom_magasin): void
+    {
+        $this->nom_magasin = $nom_magasin;
+    }
+
+    public function getVille(): ?string
+    {
+        return $this->ville;
+    }
+
+    public function setVille(?string $ville): void
+    {
+        $this->ville = $ville;
+    }
+
 }

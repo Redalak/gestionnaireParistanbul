@@ -157,6 +157,13 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
                     <span class="nav-label">Statistiques</span>
                 </a>
             </li>
+                <!-- Logistique -->
+                <li class="nav-item">
+                    <a href="agenda.php" class="nav-link">
+                        <span class="material-symbols-rounded">query_stats</span>
+                        <span class="nav-label">Agenda</span>
+                    </a>
+                </li>
 
             <!-- Factures -->
             <li class="nav-item">
@@ -596,12 +603,10 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
         border-radius: 12px;
         font-weight: 500;
     }
-    
     .quantite-alerte {
         color: #d32f2f;
         background-color: #ffebee;
     }
-    
     .commandes-table tbody tr:hover {
         background-color: #f5f5f5;
     }
@@ -626,7 +631,6 @@ $produitsSousSeuil = $produitRepository->getProduitsSousSeuil();
 <footer>
     &copy; <?= date('Y') ?> Paristanbul — Gestionnaire de stock
 </footer>
-
 
 </body>
 </html>
